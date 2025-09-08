@@ -33,7 +33,7 @@ type PdfLike = {
 };
 
 const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
-    const [pageCount, setPageCount] = useState<string>("Загрузка...");
+    // const [pageCount, setPageCount] = useState<string>("Загрузка...");
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [pageNumber, setPageNumber] = useState<number>(1);
     const pdfRef = useRef<PdfLike | null>(null);
@@ -42,11 +42,8 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
         const renderPDFPreview = async () => {
             try {
                 const pdfjsLib = await import("pdfjs-dist");
-                // Настраиваем воркер на ТУ ЖЕ версию, что и пакет (5.4.149), иначе будет ошибка несовпадения версий
-                // @ts-expect-error vendor global provided at runtime
-                pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.4.149/build/pdf.worker.min.mjs";
 
-                // @ts-expect-error typed at runtime by pdf.js
+                pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.4.149/build/pdf.worker.min.mjs";
                 const loadingTask = pdfjsLib.getDocument(drawing.pdfUrl);
                 const pdf = await loadingTask.promise;
                 const page = await pdf.getPage(1);
@@ -57,16 +54,17 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                 if (!context) return;
                 canvas.height = viewport.height as number;
                 canvas.width = viewport.width as number;
+                // @ts-expect-error - viewport type mismatch, pdfjs types may be incomplete
                 await page.render({ canvasContext: context, viewport }).promise;
                 if (!cancelled) {
-                    pdfRef.current = pdf;
-                    setPageCount(`${pdf.numPages} стр.`);
+                    // pdfRef.current = pdf;
+                    // setPageCount(`${pdf.numPages} стр.`);
                     setIsLoading(false);
                 }
             } catch (error) {
                 console.error("Ошибка загрузки PDF:", error);
                 if (!cancelled) {
-                    setPageCount("Ошибка");
+                    // setPageCount("Ошибка");
                     setIsLoading(false);
                 }
             }
@@ -117,7 +115,7 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                     </div>
                 )}
                 <canvas id={drawing.canvasId} className="w-full h-full object-contain"></canvas>
-                <Badge className="absolute bottom-2 right-2 bg-black/70 text-white hover:bg-black/70">{pageCount}</Badge>
+                {/*<Badge className="absolute bottom-2 right-2 bg-black/70 text-white hover:bg-black/70">{pageCount}</Badge>*/}
                 {/* Переключение страниц в превью */}
                 <div className="absolute top-2 left-2 flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => setPageNumber((p) => Math.max(1, p - 1))}>

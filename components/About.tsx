@@ -1,6 +1,6 @@
 // components/About.tsx
 import Image from "next/image";
-import { Briefcase, GraduationCap, Medal, CheckCircle } from 'lucide-react';
+import { Briefcase, GraduationCap, CheckCircle } from 'lucide-react';
 export default function About() {
 
     return (

@@ -13,7 +13,7 @@ export default function RoomPdfPage() {
   const room = params?.room as string;
   const src = searchParams.get("src");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [pageCount, setPageCount] = useState<number>(0);
+  // const [pageCount, setPageCount] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.1);
   const [loading, setLoading] = useState<boolean>(false);
@@ -34,8 +34,8 @@ export default function RoomPdfPage() {
         setLoading(true);
         const pdfjsLib = await import("pdfjs-dist");
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.4.149/build/pdf.worker.min.mjs";
-        const loadingTask = pdfjsLib.getDocument(src);
-        const pdf = await loadingTask.promise;
+        // const loadingTask = pdfjsLib.getDocument(src);
+        // const pdf = await loadingTask.promise;
         if (cancelled) return;
         // pdfRef.current = pdf;
         // setPageCount(pdf.numPages);
@@ -100,11 +100,11 @@ export default function RoomPdfPage() {
                 <ChevronLeft className="w-4 h-4 mr-1" />
                 <span>Назад</span>
               </Button>
-              <Button size="sm" className="text-xl" variant="outline" onClick={() => setPageNumber(p => Math.min(pageCount || 1, p + 1))} disabled={pageNumber >= pageCount || loading}>
-                <span>Вперёд</span>
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-              <div className="text-sm text-black/80">Стр. {pageNumber} / {pageCount || "?"}</div>
+              {/*<Button size="sm" className="text-xl" variant="outline" onClick={() => setPageNumber(p => Math.min(pageCount || 1, p + 1))} disabled={pageNumber >= pageCount || loading}>*/}
+              {/*  <span>Вперёд</span>*/}
+              {/*  <ChevronRight className="w-4 h-4 ml-1" />*/}
+              {/*</Button>*/}
+              {/*<div className="text-sm text-black/80">Стр. {pageNumber} / {pageCount || "?"}</div>*/}
               <div className="ml-auto flex items-center gap-2">
                 <Button size="sm" variant="outline" onClick={() => setScale(s => Math.max(0.5, +(s - 0.1).toFixed(2)))} disabled={loading}>
                   <ZoomOut className="w-4 h-4" />

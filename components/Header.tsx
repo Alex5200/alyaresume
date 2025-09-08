@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Home, Briefcase, User, Mail, FileText } from "lucide-react";
+import { Menu, Briefcase, User, Mail, FileText } from "lucide-react";
 
 export default function Header() {
   return (
