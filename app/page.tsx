@@ -8,11 +8,13 @@ import Contact from "@/components/Contact";
 export default function Home() {
     return (
         <main>
-            <Header />
-            <Portfolio />
-            <Services />
-            <About />
-            <Contact />
+            <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+                <Header />
+                <Portfolio />
+                <Services />
+                <About />
+                <Contact />
+            </div>
         </main>
     );
 }
