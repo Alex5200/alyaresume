@@ -7,6 +7,16 @@
 }
 @custom-variant dark (&:is(.dark *));
 
+
+body {
+    background: linear-gradient(to bottom,
+    rgb(2, 6, 23) 0%,
+    rgb(15, 23, 42) 50%,
+    rgb(2, 6, 23) 100%
+    );
+    min-height: 100vh;
+}
+
 :root {
     --primary: #284139;
     --secondary: #809076;
