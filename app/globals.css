@@ -2,6 +2,9 @@
 
 @plugin "tailwindcss-animate";
 
+@theme {
+    --color-primary: #22c55e; /* green-500 */
+}
 @custom-variant dark (&:is(.dark *));
 
 :root {
