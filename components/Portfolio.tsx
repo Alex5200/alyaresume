@@ -25,13 +25,7 @@ const slugify = (s: string) =>
         .replace(/-+/g, "-")
         .trim();
 
-type PdfLike = {
-    numPages: number;
-    getPage: (pageNumber: number) => Promise<{
-        getViewport: (params: { scale: number }) => { width: number; height: number };
-        render: (params: { canvasContext: CanvasRenderingContext2D; viewport: { width: number; height: number } }) => { promise: Promise<void> };
-    }>;
-};
+type PdfLike = any;
 
 // PDF Preview Modal Component
 const PDFPreviewModal = ({
@@ -54,7 +48,6 @@ const PDFPreviewModal = ({
 
     useEffect(() => {
         if (!isOpen) {
-            // Reset state when closing
             setPageNumber(1);
             setScale(1.5);
             pdfRef.current = null;
@@ -109,11 +102,13 @@ const PDFPreviewModal = ({
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
-                // Clear canvas before rendering
                 context.clearRect(0, 0, canvas.width, canvas.height);
 
-                // @ts-expect-error - viewport type mismatch
-                await page.render({ canvasContext: context, viewport }).promise;
+                await page.render({
+                    canvasContext: context,
+                    canvas: canvas,
+                    viewport: viewport
+                }).promise;
             } catch (e) {
                 console.error("Render page error", e);
             } finally {
@@ -153,9 +148,7 @@ const PDFPreviewModal = ({
                     </div>
                 </DialogHeader>
 
-                {/* Toolbar */}
                 <div className="px-6 py-3 bg-slate-800/50 border-b border-white/10 flex items-center justify-between flex-wrap gap-3">
-                    {/* Page Navigation */}
                     <div className="flex items-center gap-2">
                         <Button
                             size="sm"
@@ -180,7 +173,6 @@ const PDFPreviewModal = ({
                         </Button>
                     </div>
 
-                    {/* Zoom Controls */}
                     <div className="flex items-center gap-2">
                         <Button
                             size="sm"
@@ -205,7 +197,6 @@ const PDFPreviewModal = ({
                         </Button>
                     </div>
 
-                    {/* Download Button */}
                     <Button
                         size="sm"
                         asChild
@@ -218,7 +209,6 @@ const PDFPreviewModal = ({
                     </Button>
                 </div>
 
-                {/* Canvas Area */}
                 <div className="flex-1 overflow-auto bg-slate-950 p-6 relative">
                     <div className="flex items-center justify-center min-h-full">
                         {isLoading && (
@@ -280,8 +270,11 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                 canvas.height = scaledViewport.height;
                 canvas.width = scaledViewport.width;
 
-                // @ts-expect-error - viewport type mismatch
-                await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
+                await page.render({
+                    canvasContext: context,
+                    canvas: canvas,
+                    viewport: scaledViewport
+                }).promise;
 
                 if (!cancelled) {
                     setIsLoading(false);
@@ -319,8 +312,11 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                 canvas.height = scaledViewport.height;
                 canvas.width = scaledViewport.width;
 
-                // @ts-expect-error - viewport type mismatch
-                await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
+                await page.render({
+                    canvasContext: context,
+                    canvas: canvas,
+                    viewport: scaledViewport
+                }).promise;
             } catch (e) {
                 console.error("Render page error", e);
             } finally {
@@ -330,8 +326,7 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
         if (pdfRef.current) {
             renderPage();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pageNumber]);
+    }, [pageNumber, drawing.canvasId]);
 
     const openFullscreen = () => {
         if (typeof window !== "undefined") {
@@ -357,7 +352,6 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
     return (
         <>
             <Card className="group overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border border-white/10 hover:border-green-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-green-500/20 hover:-translate-y-2">
-                {/* Preview Area */}
                 <div className="relative h-64 lg:h-72 bg-gradient-to-br from-slate-800 to-slate-900 cursor-pointer overflow-hidden" onClick={handlePreviewClick}>
                     {isLoading && (
                         <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm z-10">
@@ -370,7 +364,6 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
 
                     <canvas id={drawing.canvasId} className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" />
 
-                    {/* Overlay на hover */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <div className="flex gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                             <Button size="sm" className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white border border-white/20">
@@ -380,7 +373,6 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                         </div>
                     </div>
 
-                    {/* Page Navigation */}
                     {totalPages > 1 && (
                         <div className="absolute top-3 left-3 flex gap-2 z-20" onClick={(e) => e.stopPropagation()}>
                             <Button
@@ -427,26 +419,26 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                        {/*<Button*/}
-                        {/*    asChild*/}
-                        {/*    size="sm"*/}
-                        {/*    className="flex-1 bg-gradient-to-r from-green-500 to-green-800 hover:from-green-400 hover:to-green-700 text-white border-0 shadow-lg shadow-green-500/30"*/}
-                        {/*>*/}
-                        {/*    <a href={`/${slugify(drawing.title)}/pdf?src=${encodeURIComponent(drawing.pdfUrl)}`} className="flex items-center justify-center gap-2">*/}
-                        {/*        <FileText className="w-4 h-4" />*/}
-                        {/*        <span>PDF</span>*/}
-                        {/*    </a>*/}
-                        {/*</Button>*/}
-                        {/*<Button*/}
-                        {/*    asChild*/}
-                        {/*    size="sm"*/}
-                        {/*    className="flex-1 bg-gradient-to-r from-green-600 to-green-900 hover:from-green-500 hover:to-green-800 text-white border-0 shadow-lg shadow-green-600/30"*/}
-                        {/*>*/}
-                        {/*    <a href={`/${slugify(drawing.title)}/3d`} className="flex items-center justify-center gap-2">*/}
-                        {/*        <Box className="w-4 h-4" />*/}
-                        {/*        <span>3D</span>*/}
-                        {/*    </a>*/}
-                        {/*</Button>*/}
+                        <Button
+                            asChild
+                            size="sm"
+                            className="flex-1 bg-gradient-to-r from-green-500 to-green-800 hover:from-green-400 hover:to-green-700 text-white border-0 shadow-lg shadow-green-500/30"
+                        >
+                            <a href={`/${slugify(drawing.title)}/pdf?src=${encodeURIComponent(drawing.pdfUrl)}`} className="flex items-center justify-center gap-2">
+                                <FileText className="w-4 h-4" />
+                                <span>PDF</span>
+                            </a>
+                        </Button>
+                        <Button
+                            asChild
+                            size="sm"
+                            className="flex-1 bg-gradient-to-r from-green-600 to-green-900 hover:from-green-500 hover:to-green-800 text-white border-0 shadow-lg shadow-green-600/30"
+                        >
+                            <a href={`/${slugify(drawing.title)}/3d`} className="flex items-center justify-center gap-2">
+                                <Box className="w-4 h-4" />
+                                <span>3D</span>
+                            </a>
+                        </Button>
                         <Button
                             size="sm"
                             variant="outline"
@@ -459,7 +451,6 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                 </CardContent>
             </Card>
 
-            {/* PDF Preview Modal */}
             <PDFPreviewModal
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
@@ -509,11 +500,11 @@ export default function Portfolio() {
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center mb-12 lg:mb-16">
                     <div className="inline-block">
-                        <Badge className="mb-4 text-2xl bg-gradient-to-r from-green-500/20 to-green-800/20 text-green-400 border border-green-500/30 px-4 py-1">
+                        <Badge className="mb-4 bg-gradient-to-r from-green-500/20 to-green-800/20 text-green-400 border border-green-500/30 px-4 py-1">
                             Портфолио
                         </Badge>
                     </div>
-                    <h2 className="text-4xl lg:text-5xl  text-white mb-4 bg-gradient-to-r from-white via-green-100 to-green-200 bg-clip-text text-transparent">
+                    <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white via-green-100 to-green-200 bg-clip-text text-transparent tracking-wide">
                         Примеры работ
                     </h2>
                     <p className="text-white/60 text-lg max-w-2xl mx-auto">
@@ -531,7 +522,7 @@ export default function Portfolio() {
                     <Button
                         asChild
                         size="lg"
-                        className="bg-gradient-to-r tracking-[0.04em] from-green-500 to-green-800 hover:from-green-400 hover:to-green-700 text-white border-0 shadow-2xl shadow-green-500/30 hover:shadow-green-500/50 transition-all duration-300 px-8 py-6 text-lg "
+                        className="bg-gradient-to-r from-green-500 to-green-800 hover:from-green-400 hover:to-green-700 text-white border-0 shadow-2xl shadow-green-500/30 hover:shadow-green-500/50 transition-all duration-300 px-8 py-6 text-lg font-semibold"
                     >
                         <a href="#contact">Заказать подобный проект</a>
                     </Button>
