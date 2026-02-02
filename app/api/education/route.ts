@@ -1,20 +1,50 @@
 // app/api/education/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { kv } from "@vercel/kv";
 
-const EDUCATION_FILE = path.join(process.cwd(), "data", "education.json");
+const DEFAULT_DATA = {
+    heading: {
+        main: "Образование",
+        description: "Профессиональная подготовка и квалификация"
+    },
+    items: [
+        {
+            id: 1,
+            year: "2027",
+            title: "Московский технологический институт \"ВТУ\", Москва",
+            subtitle: "Строительство, Промышленное и гражданское строительство",
+            type: "education",
+            isActive: true,
+            order: 1
+        },
+        {
+            id: 2,
+            year: "2023",
+            title: "Колледж Архитектуры Дизайна и Реинжиниринга №26",
+            subtitle: "Дизайн по отраслям 2019-2023г",
+            type: "education",
+            isActive: true,
+            order: 2
+        }
+    ]
+};
 
 // GET - Получить образование
 export async function GET() {
     try {
-        const data = await fs.readFile(EDUCATION_FILE, "utf-8");
-        return NextResponse.json(JSON.parse(data));
+        let data = await kv.get("education");
+
+        // Если данных нет, создаем дефолтные
+        if (!data) {
+            await kv.set("education", DEFAULT_DATA);
+            data = DEFAULT_DATA;
+        }
+
+        return NextResponse.json(data);
     } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to read education" },
-            { status: 500 }
-        );
+        console.error("GET error:", error);
+        // Возвращаем дефолтные данные при ошибке
+        return NextResponse.json(DEFAULT_DATA);
     }
 }
 
@@ -23,27 +53,22 @@ export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
 
-        console.log("Trying to save to:", EDUCATION_FILE);
-        console.log("Data:", body);
-
-        // Проверяем существует ли директория
-        const dir = path.dirname(EDUCATION_FILE);
-        try {
-            await fs.access(dir);
-        } catch {
-            // Создаем директорию если её нет
-            await fs.mkdir(dir, { recursive: true });
+        // Валидация данных
+        if (!body.heading || !body.items) {
+            return NextResponse.json(
+                { error: "Invalid data format" },
+                { status: 400 }
+            );
         }
 
-        // Сохраняем файл
-        await fs.writeFile(EDUCATION_FILE, JSON.stringify(body, null, 2), 'utf-8');
+        await kv.set("education", body);
 
         return NextResponse.json({
-            message: "Education updated successfully",
-            path: EDUCATION_FILE
+            success: true,
+            message: "Education updated successfully"
         });
     } catch (error) {
-        console.error("Update error:", error);
+        console.error("PUT error:", error);
         return NextResponse.json(
             {
                 error: "Failed to update education",

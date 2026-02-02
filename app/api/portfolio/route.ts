@@ -1,30 +1,40 @@
 // app/api/portfolio/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { kv } from "@vercel/kv";
 
-const PORTFOLIO_FILE = path.join(process.cwd(), "data", "portfolio.json");
+const DEFAULT_DATA = {
+    heading: {
+        main: "Портфолио работ",
+        description: "Профессиональные чертежи и дизайн-проекты с детальной проработкой"
+    },
+    ctaButton: {
+        text: "Заказать подобный проект",
+        link: "#contact"
+    },
+    projects: []
+};
 
-// GET - Получить портфолио
 export async function GET() {
     try {
-        const data = await fs.readFile(PORTFOLIO_FILE, "utf-8");
-        return NextResponse.json(JSON.parse(data));
+        let data = await kv.get("portfolio");
+        if (!data) {
+            await kv.set("portfolio", DEFAULT_DATA);
+            data = DEFAULT_DATA;
+        }
+        return NextResponse.json(data);
     } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to read portfolio" },
-            { status: 500 }
-        );
+        console.error("GET error:", error);
+        return NextResponse.json(DEFAULT_DATA);
     }
 }
 
-// PUT - Обновить портфолио
 export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
-        await fs.writeFile(PORTFOLIO_FILE, JSON.stringify(body, null, 2));
-        return NextResponse.json({ message: "Portfolio updated successfully" });
+        await kv.set("portfolio", body);
+        return NextResponse.json({ success: true, message: "Portfolio updated" });
     } catch (error) {
+        console.error("PUT error:", error);
         return NextResponse.json(
             { error: "Failed to update portfolio" },
             { status: 500 }
