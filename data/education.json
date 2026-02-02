@@ -1,0 +1,44 @@
+{
+  "heading": {
+    "main": "Образование",
+    "description": "Профессиональная подготовка и квалификация"
+  },
+  "items": [
+    {
+      "id": 1,
+      "year": "2027",
+      "title": "Московский технологический институт \"ВТУ\", Москва",
+      "subtitle": "Строительство, Промышленное и гражданское строительство",
+      "type": "education",
+      "isActive": true,
+      "order": 1
+    },
+    {
+      "id": 2,
+      "year": "2023",
+      "title": "Колледж Архитектуры Дизайна и Реинжиниринга №26",
+      "subtitle": "Дизайн по отраслям 2019-2023г",
+      "type": "education",
+      "isActive": true,
+      "order": 2
+    },
+    {
+      "id": 3,
+      "year": "2020",
+      "title": "WorldSkills",
+      "subtitle": "WorldSkills Russia совместно с ФГБОУ «ВДЦ Орленок», Дизайн интерьера",
+      "type": "certificate",
+      "isActive": true,
+      "order": 3
+    },
+    {
+      "id": 4,
+      "year": "2018",
+      "title": "Свидетельство",
+      "subtitle": "АНОО Центр художественного и эстетического развития «Параллель»",
+      "type": "certificate",
+      "isActive": true,
+      "order": 4
+    }
+  ]
+}

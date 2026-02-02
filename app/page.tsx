@@ -7,6 +7,7 @@ import Services from "@/components/Services";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import Education from "@/components/Education";
 
 export default function Home() {
     return (
@@ -14,6 +15,7 @@ export default function Home() {
             <Header />
             <Hero />
             <Portfolio />
+            <Education/>
             {/*<SitePlans />*/}
             {/*<Services />*/}
             {/*<About />*/}
