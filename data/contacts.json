@@ -10,8 +10,8 @@
     "description": "Для официальных запросов",
     "isPrimary": false
   },
-  "workHours": "",
-  "location": "",
+  "workHours": "9-19",
+  "location": "Moscow",
   "responseTime": "",
   "features": [],
   "heading": {
