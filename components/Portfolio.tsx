@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, Box, ChevronLeft, ChevronRight, Eye, X, ZoomIn, ZoomOut, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Drawing {
     id: number;
@@ -319,6 +320,11 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                                 <ChevronRight className="w-4 h-4" />
                             </Button>
                         </div>
+                    )}
+                    {drawing.category && (
+                        <Badge className="absolute top-3 right-3 bg-gradient-to-r bg-[#8B7355] rounded-2xl p-2 urple-600 text-white border-0 shadow-lg">
+                            {drawing.category}
+                        </Badge>
                     )}
                 </div>
                 <CardContent className="p-6 space-y-4">

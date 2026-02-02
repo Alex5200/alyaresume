@@ -34,15 +34,6 @@
       "category": "Квартиры",
       "isActive": true,
       "order": 3
-    },
-    {
-      "id": 4,
-      "title": "",
-      "description": "",
-      "pdfUrl": "/pdf/1770058293720-_____________-_________1_.pdf",
-      "category": "Квартиры",
-      "isActive": true,
-      "order": 4
     }
   ]
 }
