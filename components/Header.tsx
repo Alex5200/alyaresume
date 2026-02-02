@@ -36,10 +36,8 @@ export default function Header() {
                 href="#hero"
                 className="text-2xl font-light text-[#8B7355] tracking-wider hover:text-[#D4A574] transition-colors duration-300"
             >
-              Алевтина
-              <span className="block text-xs text-[#8B7355]/60 font-normal tracking-widest mt-1">
-                            АРХИТЕКТОР
-                        </span>
+
+
             </a>
 
             {/* Desktop Navigation */}
