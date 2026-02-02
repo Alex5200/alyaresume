@@ -5,15 +5,35 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Box, ChevronLeft, ChevronRight, Eye, X, ZoomIn, ZoomOut, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Sparkles } from "lucide-react";
 
 interface Drawing {
     id: number;
     pdfUrl: string;
     title: string;
     description: string;
-    year: string;
     category?: string;
     canvasId: string;
+}
+
+interface PortfolioData {
+    heading: {
+        main: string;
+        description: string;
+    };
+    ctaButton: {
+        text: string;
+        link: string;
+    };
+    projects: Array<{
+        id: number;
+        title: string;
+        description: string;
+        pdfUrl: string;
+        category?: string;
+        isActive: boolean;
+        order: number;
+    }>;
 }
 
 const slugify = (s: string) =>
@@ -26,7 +46,7 @@ const slugify = (s: string) =>
 
 type PdfLike = any;
 
-// PDF Preview Modal Component
+// PDF Preview Modal Component (остается без изменений)
 const PDFPreviewModal = ({
                              isOpen,
                              onClose,
@@ -58,12 +78,9 @@ const PDFPreviewModal = ({
             try {
                 setIsLoading(true);
                 const pdfjsLib = await import("pdfjs-dist");
-
                 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-
                 const loadingTask = pdfjsLib.getDocument(pdfUrl);
                 const pdf = await loadingTask.promise;
-
                 if (!cancelled) {
                     pdfRef.current = pdf;
                     setTotalPages(pdf.numPages);
@@ -76,33 +93,25 @@ const PDFPreviewModal = ({
                 }
             }
         };
-
         loadPDF();
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, [isOpen, pdfUrl]);
 
     useEffect(() => {
         if (!isOpen || !pdfRef.current) return;
-
         const renderPage = async () => {
             const pdf = pdfRef.current;
             const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
             if (!pdf || !canvas) return;
-
             try {
                 setIsLoading(true);
                 const page = await pdf.getPage(pageNumber);
                 const viewport = page.getViewport({ scale });
                 const context = canvas.getContext("2d");
                 if (!context) return;
-
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
-
                 context.clearRect(0, 0, canvas.width, canvas.height);
-
                 await page.render({
                     canvasContext: context,
                     canvas: canvas,
@@ -114,7 +123,6 @@ const PDFPreviewModal = ({
                 setIsLoading(false);
             }
         };
-
         renderPage();
     }, [pageNumber, scale, canvasId, isOpen]);
 
@@ -136,78 +144,41 @@ const PDFPreviewModal = ({
                                 Предпросмотр документа
                             </DialogDescription>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={onClose}
-                            className="text-[#8B7355]/70 hover:text-[#8B7355] hover:bg-[#8B7355]/5 rounded-full flex-shrink-0"
-                        >
+                        <Button variant="ghost" size="icon" onClick={onClose} className="text-[#8B7355]/70 hover:text-[#8B7355] hover:bg-[#8B7355]/5 rounded-full flex-shrink-0">
                             <X className="w-5 h-5" />
                         </Button>
                     </div>
                 </DialogHeader>
-
                 <div className="px-8 py-4 bg-white/50 border-b border-[#8B7355]/10 flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-3">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={handlePrevPage}
-                            disabled={pageNumber === 1}
-                            className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full"
-                        >
+                        <Button size="sm" variant="outline" onClick={handlePrevPage} disabled={pageNumber === 1} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
                             <ChevronLeft className="w-4 h-4" />
                         </Button>
                         <div className="px-5 py-2 bg-[#D4A574]/10 text-[#8B7355] rounded-full text-sm font-light">
                             {pageNumber} / {totalPages}
                         </div>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={handleNextPage}
-                            disabled={pageNumber === totalPages}
-                            className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full"
-                        >
+                        <Button size="sm" variant="outline" onClick={handleNextPage} disabled={pageNumber === totalPages} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
                             <ChevronRight className="w-4 h-4" />
                         </Button>
                     </div>
-
                     <div className="flex items-center gap-3">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={handleZoomOut}
-                            disabled={scale <= 0.5}
-                            className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full"
-                        >
+                        <Button size="sm" variant="outline" onClick={handleZoomOut} disabled={scale <= 0.5} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
                             <ZoomOut className="w-4 h-4" />
                         </Button>
                         <div className="px-5 py-2 bg-[#D4A574]/10 text-[#8B7355] rounded-full text-sm font-light min-w-[80px] text-center">
                             {Math.round(scale * 100)}%
                         </div>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={handleZoomIn}
-                            disabled={scale >= 3}
-                            className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full"
-                        >
+                        <Button size="sm" variant="outline" onClick={handleZoomIn} disabled={scale >= 3} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
                             <ZoomIn className="w-4 h-4" />
                         </Button>
                     </div>
-
-                    <Button
-                        size="sm"
-                        asChild
-                        className="bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light"
-                    >
+                    <Button size="sm" asChild className="bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light">
                         <a href={pdfUrl} download>
                             <Download className="w-4 h-4 mr-2" />
                             Скачать
                         </a>
                     </Button>
                 </div>
-
                 <div className="flex-1 overflow-auto bg-white p-8 relative">
                     <div className="flex items-center justify-center min-h-full">
                         {isLoading && (
@@ -218,11 +189,7 @@ const PDFPreviewModal = ({
                                 </div>
                             </div>
                         )}
-                        <canvas
-                            id={canvasId}
-                            className="shadow-2xl shadow-[#8B7355]/20 max-w-full h-auto rounded-2xl"
-                            style={{ display: isLoading ? 'none' : 'block' }}
-                        />
+                        <canvas id={canvasId} className="shadow-2xl shadow-[#8B7355]/20 max-w-full h-auto rounded-2xl" style={{ display: isLoading ? 'none' : 'block' }} />
                     </div>
                 </div>
             </DialogContent>
@@ -230,6 +197,7 @@ const PDFPreviewModal = ({
     );
 };
 
+// DrawingCard остается без изменений, но принимает drawing
 const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [pageNumber, setPageNumber] = useState<number>(1);
@@ -242,39 +210,25 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
         const renderPDFPreview = async () => {
             try {
                 const pdfjsLib = await import("pdfjs-dist");
-
                 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-
                 const loadingTask = pdfjsLib.getDocument(drawing.pdfUrl);
                 const pdf = await loadingTask.promise;
-
                 if (!cancelled) {
                     pdfRef.current = pdf;
                     setTotalPages(pdf.numPages);
                 }
-
                 const page = await pdf.getPage(1);
                 const viewport = page.getViewport({ scale: 1 });
                 const canvas = document.getElementById(drawing.canvasId) as HTMLCanvasElement | null;
-
                 if (!canvas || cancelled) return;
-
                 const context = canvas.getContext("2d");
                 if (!context) return;
-
                 const containerWidth = canvas.parentElement?.clientWidth || 400;
                 const scale = containerWidth / viewport.width;
                 const scaledViewport = page.getViewport({ scale });
-
                 canvas.height = scaledViewport.height;
                 canvas.width = scaledViewport.width;
-
-                await page.render({
-                    canvasContext: context,
-                    canvas: canvas,
-                    viewport: scaledViewport
-                }).promise;
-
+                await page.render({ canvasContext: context, canvas: canvas, viewport: scaledViewport }).promise;
                 if (!cancelled) {
                     setIsLoading(false);
                 }
@@ -286,9 +240,7 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
             }
         };
         renderPDFPreview();
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, [drawing.pdfUrl, drawing.canvasId]);
 
     useEffect(() => {
@@ -296,26 +248,18 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
             const pdf = pdfRef.current;
             const canvas = document.getElementById(drawing.canvasId) as HTMLCanvasElement | null;
             if (!pdf || !canvas) return;
-
             try {
                 setIsLoading(true);
                 const page = await pdf.getPage(pageNumber);
                 const viewport = page.getViewport({ scale: 1 });
                 const context = canvas.getContext("2d");
                 if (!context) return;
-
                 const containerWidth = canvas.parentElement?.clientWidth || 400;
                 const scale = containerWidth / viewport.width;
                 const scaledViewport = page.getViewport({ scale });
-
                 canvas.height = scaledViewport.height;
                 canvas.width = scaledViewport.width;
-
-                await page.render({
-                    canvasContext: context,
-                    canvas: canvas,
-                    viewport: scaledViewport
-                }).promise;
+                await page.render({ canvasContext: context, canvas: canvas, viewport: scaledViewport }).promise;
             } catch (e) {
                 console.error("Render page error", e);
             } finally {
@@ -354,9 +298,7 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                             </div>
                         </div>
                     )}
-
                     <canvas id={drawing.canvasId} className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
-
                     <div className="absolute inset-0 bg-gradient-to-t from-[#8B7355]/80 via-[#8B7355]/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
                         <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                             <Button size="lg" className="bg-white/95 hover:bg-white text-[#8B7355] rounded-full shadow-xl backdrop-blur-sm font-light">
@@ -365,65 +307,35 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                             </Button>
                         </div>
                     </div>
-
                     {totalPages > 1 && (
-                        <div className="absolute top-4 left-4 flex gap-2 z-20" onClick={(e) => e.stopPropagation()}>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-9 px-3 bg-white/90 backdrop-blur-md border-[#8B7355]/20 hover:bg-white text-[#8B7355] disabled:opacity-30 rounded-full"
-                                onClick={handlePrevPage}
-                                disabled={pageNumber === 1}
-                            >
+                        <div className="absolute top-4 left-1/4 flex gap-2 z-20" onClick={(e) => e.stopPropagation()}>
+                            <Button size="sm" variant="outline" className="h-9 px-3 bg-white/90 backdrop-blur-md border-[#8B7355]/20 hover:bg-white text-[#8B7355] disabled:opacity-30 rounded-full" onClick={handlePrevPage} disabled={pageNumber === 1}>
                                 <ChevronLeft className="w-4 h-4" />
                             </Button>
                             <div className="bg-white/90 backdrop-blur-md text-[#8B7355] border border-[#8B7355]/20 h-9 px-4 flex items-center rounded-full text-sm font-light">
                                 {pageNumber} / {totalPages}
                             </div>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-9 px-3 bg-white/90 backdrop-blur-md border-[#8B7355]/20 hover:bg-white text-[#8B7355] disabled:opacity-30 rounded-full"
-                                onClick={handleNextPage}
-                                disabled={pageNumber === totalPages}
-                            >
+                            <Button size="sm" variant="outline" className="h-9 px-3 bg-white/90 backdrop-blur-md border-[#8B7355]/20 hover:bg-white text-[#8B7355] disabled:opacity-30 rounded-full" onClick={handleNextPage} disabled={pageNumber === totalPages}>
                                 <ChevronRight className="w-4 h-4" />
                             </Button>
                         </div>
                     )}
-
-                    {drawing.category && (
-                        <div className="absolute top-4 right-4 px-4 py-2 bg-[#D4A574] text-white text-xs font-light tracking-wide rounded-full shadow-lg">
-                            {drawing.category}
-                        </div>
-                    )}
                 </div>
-
                 <CardContent className="p-6 space-y-4">
                     <div>
                         <h3 className="text-xl font-light text-[#8B7355] mb-2 group-hover:text-[#D4A574] transition-colors duration-300">
                             {drawing.title}
                         </h3>
                         <p className="text-[#8B7355]/60 text-sm font-light leading-relaxed">{drawing.description}</p>
-                        <span className="text-xs text-[#8B7355]/50 font-light mt-2 block">{drawing.year}</span>
                     </div>
-
                     <div className="flex flex-wrap gap-2 pt-2">
-                        <Button
-                            asChild
-                            size="sm"
-                            className="flex-1 bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light shadow-lg shadow-[#8B7355]/20"
-                        >
+                        <Button asChild size="sm" className="flex-1 bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light shadow-lg shadow-[#8B7355]/20">
                             <a href={`/${slugify(drawing.title)}/pdf?src=${encodeURIComponent(drawing.pdfUrl)}`} className="flex items-center justify-center gap-2">
                                 <FileText className="w-4 h-4" />
                                 <span>PDF</span>
                             </a>
                         </Button>
-                        <Button
-                            asChild
-                            size="sm"
-                            className="flex-1 bg-[#D4A574] hover:bg-[#8B7355] text-white rounded-full font-light shadow-lg shadow-[#D4A574]/20"
-                        >
+                        <Button asChild size="sm" className="flex-1 bg-[#D4A574] hover:bg-[#8B7355] text-white rounded-full font-light shadow-lg shadow-[#D4A574]/20">
                             <a href={`/${slugify(drawing.title)}/3d`} className="flex items-center justify-center gap-2">
                                 <Box className="w-4 h-4" />
                                 <span>3D</span>
@@ -432,74 +344,63 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                     </div>
                 </CardContent>
             </Card>
-
-            <PDFPreviewModal
-                isOpen={isPreviewOpen}
-                onClose={() => setIsPreviewOpen(false)}
-                pdfUrl={drawing.pdfUrl}
-                title={drawing.title}
-            />
+            <PDFPreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} pdfUrl={drawing.pdfUrl} title={drawing.title} />
         </>
     );
 };
 
 export default function Portfolio() {
-    const drawings: Drawing[] = [
-        {
-            id: 1,
-            pdfUrl: "/pdf/крузенштерна23.07.pdf",
-            title: "Крузенштерна 23.07",
-            description: "Детализированный чертеж с полной технической документацией",
-            year: "2024 г.",
-            category: "Квартиры",
-            canvasId: "pdf-canvas-1",
-        },
-        {
-            id: 2,
-            pdfUrl: "/Краснодар.pdf",
-            title: "Дизайн проект квартиры 73 кв.м",
-            description: "Комплексный дизайн-проект с планировочными решениями",
-            year: "2023 г.",
-            category: "Квартиры",
-            canvasId: "pdf-canvas-2",
-        },
-        {
-            id: 3,
-            pdfUrl: "/Свобода.pdf",
-            title: "Жилой комплекс Свобода",
-            description: "Архитектурные чертежи и визуализации интерьера",
-            year: "2023 г.",
-            category: "Квартиры",
-            canvasId: "pdf-canvas-3",
-        },
-    ];
+    const [data, setData] = useState<PortfolioData | null>(null);
+
+    useEffect(() => {
+        fetch("/api/portfolio")
+            .then((res) => res.json())
+            .then((data) => setData(data))
+            .catch((err) => console.error("Failed to load portfolio:", err));
+    }, []);
+
+    if (!data) {
+        return <div className="py-24 text-center">Загрузка...</div>;
+    }
+
+    // Фильтруем только активные проекты и сортируем по order
+    const activeProjects = data.projects
+        .filter(p => p.isActive)
+        .sort((a, b) => a.order - b.order)
+        .map(p => ({
+            id: p.id,
+            pdfUrl: p.pdfUrl,
+            title: p.title,
+            description: p.description,
+            category: p.category,
+            canvasId: `pdf-canvas-${p.id}`
+        }));
 
     return (
         <section id="portfolio" className="py-24 lg:py-32 relative overflow-hidden blueprint-pattern">
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center mb-16 lg:mb-20 max-w-3xl mx-auto">
-                    <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-[#D4A574] to-transparent mx-auto mb-6" />
+                    <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#D4A574] to-transparent mx-auto mb-6 animate-pulse" />
                     <h2 className="text-4xl lg:text-5xl font-light text-[#8B7355] mb-6 tracking-tight">
-                        Портфолио работ
+                        {data.heading.main}
                     </h2>
-                    <p className="text-lg text-[#8B7355]/60 font-light leading-relaxed">
-                        Профессиональные чертежи и дизайн-проекты с детальной проработкой
-                    </p>
+                    <div className="inline-flex gap-2">
+                        <p className="text-lg text-[#8B7355]/60 font-light leading-relaxed">
+                            {data.heading.description}
+                        </p>
+                        <Sparkles className="w-4 h-4 text-[#D4A574] animate-pulse" />
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-                    {drawings.map((drawing) => (
+                    {activeProjects.map((drawing) => (
                         <DrawingCard key={drawing.id} drawing={drawing} />
                     ))}
                 </div>
 
                 <div className="text-center mt-16">
-                    <Button
-                        asChild
-                        size="lg"
-                        className="px-10 py-6 bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light tracking-wide transition-all duration-500 shadow-xl shadow-[#8B7355]/20 hover:shadow-2xl hover:shadow-[#D4A574]/30"
-                    >
-                        <a href="#contact">Заказать подобный проект</a>
+                    <Button asChild size="lg" className="px-10 py-6 bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light tracking-wide transition-all duration-500 shadow-xl shadow-[#8B7355]/20 hover:shadow-2xl hover:shadow-[#D4A574]/30">
+                        <a href={data.ctaButton.link}>{data.ctaButton.text}</a>
                     </Button>
                 </div>
             </div>

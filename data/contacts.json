@@ -1,0 +1,28 @@
+{
+  "telegram": {
+    "username": "@Alya_Wolf29",
+    "url": "https://t.me/Alya_Wolf29",
+    "description": "Быстрый ответ в течение часа",
+    "isPrimary": true
+  },
+  "email": {
+    "address": "alya_wolf2907@mail.ru",
+    "description": "Для официальных запросов",
+    "isPrimary": false
+  },
+  "workHours": "",
+  "location": "",
+  "responseTime": "",
+  "features": [],
+  "heading": {
+    "main": "",
+    "accent": ""
+  },
+  "description": "",
+  "ctaTitle": "Начните свой проект",
+  "ctaDescription": "Каждый проект уникален, и я готова уделить вам максимум внимания",
+  "bottomBanner": {
+    "title": "Готовы начать работу над проектом?",
+    "description": "Свяжитесь со мной сегодня, и давайте обсудим, как я могу помочь воплотить ваши идеи в жизнь"
+  }
+}

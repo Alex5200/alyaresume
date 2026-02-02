@@ -22,14 +22,18 @@ export default function Hero() {
             <div className="absolute top-20 left-10 w-32 h-32 border border-[#D4A574]/20 rounded-full animate-float" />
             <div className="absolute bottom-20 right-10 w-40 h-40 border border-[#8B7355]/20 rounded-full animate-float" style={{ animationDelay: '1s' }} />
 
+            <div className="absolute top-40 left-40 w-32 h-32 border border-[#D4A574]/20 rounded-full animate-spin" />
+
+            <div className="absolute bottom-20 left-40 w-32 h-32 border border-[#D4A574]/20 rounded-full animate-float" />
+
             <div className="container mx-auto px-4 relative z-10 py-32">
                 <div className="max-w-4xl mx-auto text-center">
                     {/* Декоративная линия */}
-                    <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-[#D4A574] to-transparent mx-auto mb-8" />
+                    <div className="w-20 animate-pulse h-0.5 bg-gradient-to-r from-transparent via-[#D4A574] to-transparent mx-auto mb-8" />
 
                     {/* Badge */}
                     <div className="inline-flex items-center gap-2 px-6 py-2 bg-[#F5F0E8] border border-[#D4A574]/30 rounded-full mb-8 shadow-sm animate-fade-in">
-                        <Sparkles className="w-4 h-4 text-[#D4A574]" />
+                        <Sparkles className="w-4 h-4 text-[#D4A574] animate-pulse" />
                         <span className="text-sm text-[#8B7355] font-light tracking-wide">
                             Архитектурный дизайн
                         </span>
@@ -71,27 +75,27 @@ export default function Hero() {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.6s' }}>
-                        {[
-                            { value: "5+", label: "Лет опыта", suffix: "" },
-                            { value: "100", label: "Проектов", suffix: "+" },
-                            { value: "50", label: "Клиентов", suffix: "+" },
-                            { value: "100", label: "Отзывов", suffix: "%" },
-                        ].map((stat, idx) => (
-                            <div key={idx} className="group">
-                                <div className="relative">
-                                    <div className="text-4xl md:text-5xl font-light text-[#D4A574] mb-2">
-                                        {stat.value}
-                                        <span className="text-[#8B7355]/50">{stat.suffix}</span>
-                                    </div>
-                                    <div className="text-sm text-[#8B7355]/60 font-light tracking-wider uppercase">
-                                        {stat.label}
-                                    </div>
-                                    <div className="w-12 h-0.5 bg-gradient-to-r from-[#D4A574] to-transparent mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    {/*<div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.6s' }}>*/}
+                    {/*    {[*/}
+                    {/*        { value: "5+", label: "Лет опыта", suffix: "" },*/}
+                    {/*        { value: "100", label: "Проектов", suffix: "+" },*/}
+                    {/*        { value: "50", label: "Клиентов", suffix: "+" },*/}
+                    {/*        { value: "100", label: "Отзывов", suffix: "%" },*/}
+                    {/*    ].map((stat, idx) => (*/}
+                    {/*        <div key={idx} className="group">*/}
+                    {/*            <div className="relative">*/}
+                    {/*                <div className="text-4xl md:text-5xl font-light text-[#D4A574] mb-2">*/}
+                    {/*                    {stat.value}*/}
+                    {/*                    <span className="text-[#8B7355]/50">{stat.suffix}</span>*/}
+                    {/*                </div>*/}
+                    {/*                <div className="text-sm text-[#8B7355]/60 font-light tracking-wider uppercase">*/}
+                    {/*                    {stat.label}*/}
+                    {/*                </div>*/}
+                    {/*                <div className="w-12 h-0.5 bg-gradient-to-r from-[#D4A574] to-transparent mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />*/}
+                    {/*            </div>*/}
+                    {/*        </div>*/}
+                    {/*    ))}*/}
+                    {/*</div>*/}
                 </div>
             </div>
 
