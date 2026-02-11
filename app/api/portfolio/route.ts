@@ -1,125 +1,155 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir, readdir, unlink, stat } from 'fs/promises';
-import path from 'path';
+import { NextRequest, NextResponse } from "next/server";
+import { get } from "@vercel/edge-config";
 
-// POST - загрузить PDF в public/pdf
-export async function POST(request: NextRequest) {
+const DEFAULT_DATA = {
+    heading: {
+        main: "Портфолио работ",
+        description: "Профессиональные чертежи и дизайн-проекты с детальной проработкой"
+    },
+    ctaButton: {
+        text: "Заказать подобный проект",
+        link: "#contact"
+    },
+    projects: [
+        {
+            id: 1,
+            title: "Проект 1",
+            description: "Описание проекта 1",
+            pdfUrl: "/pdf/1.pdf",
+            category: "Квартиры",
+            isActive: true,
+            order: 1
+        },
+        {
+            id: 2,
+            title: "Проект 2",
+            description: "Описание проекта 2",
+            pdfUrl: "/pdf/2.pdf",
+            category: "Дома",
+            isActive: true,
+            order: 2
+        },
+        {
+            id: 3,
+            title: "Дизайн проект квартиры Крузенштерна",
+            description: "Детализированный чертеж с полной технической документацией",
+            pdfUrl: "/pdf/крузенштерна23.07.pdf",
+            category: "Квартиры",
+            isActive: true,
+            order: 3
+        }
+    ]
+};
+
+export async function GET() {
     try {
-        const formData = await request.formData();
-        const file = formData.get('file') as File;
+        console.log("=== /api/portfolio GET ===");
 
-        if (!file) {
-            return NextResponse.json({ error: 'Файл не предоставлен' }, { status: 400 });
+        const data = await get("portfolio");
+        console.log("Edge Config data:", data);
+
+        // Если данных нет - возвращаем DEFAULT_DATA
+        if (!data) {
+            console.log("No Edge Config data, returning DEFAULT_DATA");
+            return NextResponse.json(DEFAULT_DATA);
         }
 
-        if (file.type !== 'application/pdf') {
-            return NextResponse.json({ error: 'Разрешены только PDF файлы' }, { status: 400 });
+        // Проверяем структуру
+        const portfolioData = data as any;
+
+        if (!portfolioData.projects || !Array.isArray(portfolioData.projects)) {
+            console.warn("Invalid structure, returning DEFAULT_DATA");
+            return NextResponse.json(DEFAULT_DATA);
         }
 
-        if (file.size > 10 * 1024 * 1024) {
-            return NextResponse.json({ error: 'Файл слишком большой (макс 10MB)' }, { status: 400 });
+        // Убедимся что есть все обязательные поля
+        if (!portfolioData.heading || !portfolioData.ctaButton) {
+            console.warn("Missing required fields, returning DEFAULT_DATA");
+            return NextResponse.json(DEFAULT_DATA);
         }
 
-        // Получаем байты файла
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        console.log("Returning valid portfolio data");
+        return NextResponse.json(portfolioData);
 
-        // Сохраняем оригинальное имя файла
-        const filename = file.name;
+    } catch (error) {
+        console.error("GET /api/portfolio error:", error);
+        return NextResponse.json(DEFAULT_DATA);
+    }
+}
 
-        // Путь к папке public/pdf
-        const publicDir = path.join(process.cwd(), 'public', 'pdf');
-        const filePath = path.join(publicDir, filename);
+export async function PUT(request: NextRequest) {
+    try {
+        const body = await request.json();
 
-        // Создаём папку если не существует
-        await mkdir(publicDir, { recursive: true });
+        console.log("=== /api/portfolio PUT ===");
+        console.log("Received body:", JSON.stringify(body, null, 2));
 
-        // Сохраняем файл
-        await writeFile(filePath, buffer);
-        console.log('✅ PDF saved:', filename);
+        // Валидация
+        if (!body.projects || !Array.isArray(body.projects)) {
+            return NextResponse.json(
+                { error: "Invalid data format: projects must be an array" },
+                { status: 400 }
+            );
+        }
 
-        // URL в формате /pdf/filename.pdf
-        const fileUrl = `/pdf/${filename}`;
+        if (!body.heading || !body.ctaButton) {
+            return NextResponse.json(
+                { error: "Invalid data format: missing heading or ctaButton" },
+                { status: 400 }
+            );
+        }
 
+        const edgeConfigId = process.env.EDGE_CONFIG_ID;
+        const vercelToken = process.env.VERCEL_API_TOKEN;
+
+        if (!edgeConfigId || !vercelToken) {
+            console.error("Edge Config not configured");
+            return NextResponse.json(
+                { error: "Edge Config not configured" },
+                { status: 500 }
+            );
+        }
+
+        const response = await fetch(
+            `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${vercelToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    items: [
+                        {
+                            operation: "upsert",
+                            key: "portfolio",
+                            value: body,
+                        },
+                    ],
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Edge Config update failed:", errorText);
+            throw new Error("Failed to update Edge Config");
+        }
+
+        console.log("Portfolio updated successfully");
         return NextResponse.json({
             success: true,
-            url: fileUrl,
-            filename: filename,
-            size: file.size
+            message: "Portfolio updated successfully"
         });
 
     } catch (error) {
-        console.error('❌ Upload error:', error);
+        console.error("PUT /api/portfolio error:", error);
         return NextResponse.json(
             {
-                error: 'Не удалось загрузить файл',
+                error: "Failed to update portfolio",
                 details: error instanceof Error ? error.message : String(error)
             },
             { status: 500 }
         );
-    }
-}
-
-// GET - получить список всех PDF из public/pdf
-export async function GET() {
-    try {
-        const publicDir = path.join(process.cwd(), 'public', 'pdf');
-
-        // Создаём папку если не существует
-        await mkdir(publicDir, { recursive: true });
-
-        const files = await readdir(publicDir);
-        const pdfFiles = files.filter((file: string) => file.endsWith('.pdf'));
-
-        const fileList = await Promise.all(
-            pdfFiles.map(async (file: string) => {
-                const filePath = path.join(publicDir, file);
-                const stats = await stat(filePath);
-                return {
-                    filename: file,
-                    url: `/pdf/${file}`,
-                    size: stats.size,
-                    uploadedAt: stats.birthtime,
-                };
-            })
-        );
-
-        // Сортируем по дате (новые первые)
-        fileList.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
-
-        return NextResponse.json({
-            success: true,
-            files: fileList,
-            count: fileList.length
-        });
-
-    } catch (error) {
-        console.error('List error:', error);
-        return NextResponse.json({ error: 'Не удалось получить список файлов' }, { status: 500 });
-    }
-}
-
-// DELETE - удалить PDF из public/pdf
-export async function DELETE(request: NextRequest) {
-    try {
-        const { filename } = await request.json();
-
-        if (!filename || !filename.endsWith('.pdf')) {
-            return NextResponse.json({ error: 'Некорректное имя файла' }, { status: 400 });
-        }
-
-        const filePath = path.join(process.cwd(), 'public', 'pdf', filename);
-        await unlink(filePath);
-
-        console.log('🗑️ File deleted:', filename);
-
-        return NextResponse.json({
-            success: true,
-            message: 'Файл успешно удален'
-        });
-
-    } catch (error) {
-        console.error('Delete error:', error);
-        return NextResponse.json({ error: 'Не удалось удалить файл' }, { status: 500 });
     }
 }
