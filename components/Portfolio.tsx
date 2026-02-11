@@ -1,4 +1,3 @@
-// components/Portfolio.tsx
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,20 +46,16 @@ const slugify = (s: string) =>
 
 type PdfLike = any;
 
-// ✅ Проверяем является ли URL из Blob Storage
 const isBlobUrl = (url: string) => {
     return url.includes('blob.vercel-storage.com') || url.includes('public.blob.vercel-storage.com');
 };
 
-// ✅ Функция для загрузки PDF (поддерживает и /pdf/ и Blob URLs)
 const loadPdfDocument = async (pdfUrl: string) => {
     const pdfjsLib = await import("pdfjs-dist");
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
-    // Настройки для загрузки
     const loadingTask = pdfjsLib.getDocument({
         url: pdfUrl,
-        // ✅ Для Blob URL добавляем поддержку CORS
         ...(isBlobUrl(pdfUrl) && {
             httpHeaders: {},
             withCredentials: false,
@@ -103,10 +98,8 @@ const PDFPreviewModal = ({
             try {
                 setIsLoading(true);
                 setLoadError(null);
-
                 console.log("Loading PDF from:", pdfUrl);
                 const pdf = await loadPdfDocument(pdfUrl);
-
                 if (!cancelled) {
                     pdfRef.current = pdf;
                     setTotalPages(pdf.numPages);
@@ -253,15 +246,11 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
         const renderPDFPreview = async () => {
             try {
                 setLoadError(false);
-
-                // ✅ Используем обновленную функцию загрузки
                 const pdf = await loadPdfDocument(drawing.pdfUrl);
-
                 if (!cancelled) {
                     pdfRef.current = pdf;
                     setTotalPages(pdf.numPages);
                 }
-
                 const page = await pdf.getPage(1);
                 const viewport = page.getViewport({ scale: 1 });
                 const canvas = document.getElementById(drawing.canvasId) as HTMLCanvasElement | null;
@@ -274,7 +263,6 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                 canvas.height = scaledViewport.height;
                 canvas.width = scaledViewport.width;
                 await page.render({ canvasContext: context, canvas: canvas, viewport: scaledViewport }).promise;
-
                 if (!cancelled) {
                     setIsLoading(false);
                 }
@@ -421,6 +409,8 @@ export default function Portfolio() {
 
     useEffect(() => {
         setIsLoading(true);
+
+        // ✅ Загружаем из API, если не получилось - из localStorage
         fetch("/api/portfolio")
             .then((res) => {
                 if (!res.ok) {
@@ -428,14 +418,54 @@ export default function Portfolio() {
                 }
                 return res.json();
             })
-            .then((data) => {
-                console.log("Portfolio data received:", data);
-                setData(data);
+            .then((apiData) => {
+                console.log("Portfolio data from API:", apiData);
+
+                // ✅ Пытаемся взять из localStorage если есть более свежие данные
+                const localData = localStorage.getItem('portfolio_backup');
+                if (localData) {
+                    try {
+                        const parsedLocal = JSON.parse(localData);
+                        console.log("Portfolio data from localStorage:", parsedLocal);
+
+                        // Если в localStorage больше проектов или есть Blob URLs - используем его
+                        if (parsedLocal.projects && Array.isArray(parsedLocal.projects)) {
+                            const hasBlob URLs = parsedLocal.projects.some((p: any) =>
+                                p.pdfUrl && isBlobUrl(p.pdfUrl)
+                            );
+
+                            if (hasBlob || parsedLocal.projects.length > apiData.projects?.length) {
+                                console.log("Using localStorage data (has Blob URLs or more projects)");
+                                setData(parsedLocal);
+                                setIsLoading(false);
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Failed to parse localStorage:", e);
+                    }
+                }
+
+                // Используем данные из API
+                setData(apiData);
                 setIsLoading(false);
             })
             .catch((err) => {
-                console.error("Failed to load portfolio:", err);
-                setError(err.message);
+                console.error("Failed to load from API, trying localStorage:", err);
+
+                // ✅ Fallback на localStorage
+                const localData = localStorage.getItem('portfolio_backup');
+                if (localData) {
+                    try {
+                        const parsedLocal = JSON.parse(localData);
+                        console.log("Using localStorage fallback:", parsedLocal);
+                        setData(parsedLocal);
+                    } catch (parseErr) {
+                        setError("Не удалось загрузить данные");
+                    }
+                } else {
+                    setError(err.message);
+                }
                 setIsLoading(false);
             });
     }, []);
@@ -472,7 +502,7 @@ export default function Portfolio() {
         .sort((a, b) => a.order - b.order)
         .map(p => ({
             id: p.id,
-            pdfUrl: p.pdfUrl, // ✅ Работает с /pdf/ и с Blob URLs
+            pdfUrl: p.pdfUrl,
             title: p.title,
             description: p.description,
             category: p.category,
