@@ -47,7 +47,29 @@ const slugify = (s: string) =>
 
 type PdfLike = any;
 
-// PDF Preview Modal Component (остается без изменений)
+// ✅ Проверяем является ли URL из Blob Storage
+const isBlobUrl = (url: string) => {
+    return url.includes('blob.vercel-storage.com') || url.includes('public.blob.vercel-storage.com');
+};
+
+// ✅ Функция для загрузки PDF (поддерживает и /pdf/ и Blob URLs)
+const loadPdfDocument = async (pdfUrl: string) => {
+    const pdfjsLib = await import("pdfjs-dist");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+
+    // Настройки для загрузки
+    const loadingTask = pdfjsLib.getDocument({
+        url: pdfUrl,
+        // ✅ Для Blob URL добавляем поддержку CORS
+        ...(isBlobUrl(pdfUrl) && {
+            httpHeaders: {},
+            withCredentials: false,
+        })
+    });
+
+    return await loadingTask.promise;
+};
+
 const PDFPreviewModal = ({
                              isOpen,
                              onClose,
@@ -63,6 +85,7 @@ const PDFPreviewModal = ({
     const [totalPages, setTotalPages] = useState<number>(1);
     const [scale, setScale] = useState<number>(1.5);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const pdfRef = useRef<PdfLike | null>(null);
     const canvasId = `preview-canvas-${pdfUrl.replace(/[^a-z0-9]/gi, '')}`;
 
@@ -71,6 +94,7 @@ const PDFPreviewModal = ({
             setPageNumber(1);
             setScale(1.5);
             pdfRef.current = null;
+            setLoadError(null);
             return;
         }
 
@@ -78,18 +102,21 @@ const PDFPreviewModal = ({
         const loadPDF = async () => {
             try {
                 setIsLoading(true);
-                const pdfjsLib = await import("pdfjs-dist");
-                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-                const loadingTask = pdfjsLib.getDocument(pdfUrl);
-                const pdf = await loadingTask.promise;
+                setLoadError(null);
+
+                console.log("Loading PDF from:", pdfUrl);
+                const pdf = await loadPdfDocument(pdfUrl);
+
                 if (!cancelled) {
                     pdfRef.current = pdf;
                     setTotalPages(pdf.numPages);
                     setPageNumber(1);
+                    console.log("PDF loaded successfully, pages:", pdf.numPages);
                 }
             } catch (error) {
                 console.error("Ошибка загрузки PDF:", error);
                 if (!cancelled) {
+                    setLoadError("Не удалось загрузить PDF");
                     setIsLoading(false);
                 }
             }
@@ -150,47 +177,62 @@ const PDFPreviewModal = ({
                         </Button>
                     </div>
                 </DialogHeader>
-                <div className="px-8 py-4 bg-white/50 border-b border-[#8B7355]/10 flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-3">
-                        <Button size="sm" variant="outline" onClick={handlePrevPage} disabled={pageNumber === 1} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
-                            <ChevronLeft className="w-4 h-4" />
-                        </Button>
-                        <div className="px-5 py-2 bg-[#D4A574]/10 text-[#8B7355] rounded-full text-sm font-light">
-                            {pageNumber} / {totalPages}
+
+                {!loadError && (
+                    <div className="px-8 py-4 bg-white/50 border-b border-[#8B7355]/10 flex items-center justify-between flex-wrap gap-4">
+                        <div className="flex items-center gap-3">
+                            <Button size="sm" variant="outline" onClick={handlePrevPage} disabled={pageNumber === 1} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
+                                <ChevronLeft className="w-4 h-4" />
+                            </Button>
+                            <div className="px-5 py-2 bg-[#D4A574]/10 text-[#8B7355] rounded-full text-sm font-light">
+                                {pageNumber} / {totalPages}
+                            </div>
+                            <Button size="sm" variant="outline" onClick={handleNextPage} disabled={pageNumber === totalPages} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
+                                <ChevronRight className="w-4 h-4" />
+                            </Button>
                         </div>
-                        <Button size="sm" variant="outline" onClick={handleNextPage} disabled={pageNumber === totalPages} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
-                            <ChevronRight className="w-4 h-4" />
+                        <div className="flex items-center gap-3">
+                            <Button size="sm" variant="outline" onClick={handleZoomOut} disabled={scale <= 0.5} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
+                                <ZoomOut className="w-4 h-4" />
+                            </Button>
+                            <div className="px-5 py-2 bg-[#D4A574]/10 text-[#8B7355] rounded-full text-sm font-light min-w-[80px] text-center">
+                                {Math.round(scale * 100)}%
+                            </div>
+                            <Button size="sm" variant="outline" onClick={handleZoomIn} disabled={scale >= 3} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
+                                <ZoomIn className="w-4 h-4" />
+                            </Button>
+                        </div>
+                        <Button size="sm" asChild className="bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light">
+                            <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">
+                                <Download className="w-4 h-4 mr-2" />
+                                Скачать
+                            </a>
                         </Button>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Button size="sm" variant="outline" onClick={handleZoomOut} disabled={scale <= 0.5} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
-                            <ZoomOut className="w-4 h-4" />
-                        </Button>
-                        <div className="px-5 py-2 bg-[#D4A574]/10 text-[#8B7355] rounded-full text-sm font-light min-w-[80px] text-center">
-                            {Math.round(scale * 100)}%
-                        </div>
-                        <Button size="sm" variant="outline" onClick={handleZoomIn} disabled={scale >= 3} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
-                            <ZoomIn className="w-4 h-4" />
-                        </Button>
-                    </div>
-                    <Button size="sm" asChild className="bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light">
-                        <a href={pdfUrl} download>
-                            <Download className="w-4 h-4 mr-2" />
-                            Скачать
-                        </a>
-                    </Button>
-                </div>
+                )}
+
                 <div className="flex-1 overflow-auto bg-white p-8 relative">
                     <div className="flex items-center justify-center min-h-full">
-                        {isLoading && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-[#F5F0E8]/90 backdrop-blur-sm z-10">
-                                <div className="flex flex-col items-center gap-4">
-                                    <div className="w-16 h-16 border-4 border-[#D4A574] border-t-transparent rounded-full animate-spin" />
-                                    <span className="text-[#8B7355]/70 text-base font-light">Загрузка страницы...</span>
-                                </div>
+                        {loadError ? (
+                            <div className="text-center">
+                                <p className="text-red-600 mb-4">{loadError}</p>
+                                <Button onClick={onClose} variant="outline">
+                                    Закрыть
+                                </Button>
                             </div>
+                        ) : (
+                            <>
+                                {isLoading && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[#F5F0E8]/90 backdrop-blur-sm z-10">
+                                        <div className="flex flex-col items-center gap-4">
+                                            <div className="w-16 h-16 border-4 border-[#D4A574] border-t-transparent rounded-full animate-spin" />
+                                            <span className="text-[#8B7355]/70 text-base font-light">Загрузка страницы...</span>
+                                        </div>
+                                    </div>
+                                )}
+                                <canvas id={canvasId} className="shadow-2xl shadow-[#8B7355]/20 max-w-full h-auto rounded-2xl" style={{ display: isLoading ? 'none' : 'block' }} />
+                            </>
                         )}
-                        <canvas id={canvasId} className="shadow-2xl shadow-[#8B7355]/20 max-w-full h-auto rounded-2xl" style={{ display: isLoading ? 'none' : 'block' }} />
                     </div>
                 </div>
             </DialogContent>
@@ -198,26 +240,28 @@ const PDFPreviewModal = ({
     );
 };
 
-// DrawingCard остается без изменений, но принимает drawing
 const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
+    const [loadError, setLoadError] = useState<boolean>(false);
     const pdfRef = useRef<PdfLike | null>(null);
 
     useEffect(() => {
         let cancelled = false;
         const renderPDFPreview = async () => {
             try {
-                const pdfjsLib = await import("pdfjs-dist");
-                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-                const loadingTask = pdfjsLib.getDocument(drawing.pdfUrl);
-                const pdf = await loadingTask.promise;
+                setLoadError(false);
+
+                // ✅ Используем обновленную функцию загрузки
+                const pdf = await loadPdfDocument(drawing.pdfUrl);
+
                 if (!cancelled) {
                     pdfRef.current = pdf;
                     setTotalPages(pdf.numPages);
                 }
+
                 const page = await pdf.getPage(1);
                 const viewport = page.getViewport({ scale: 1 });
                 const canvas = document.getElementById(drawing.canvasId) as HTMLCanvasElement | null;
@@ -230,13 +274,15 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                 canvas.height = scaledViewport.height;
                 canvas.width = scaledViewport.width;
                 await page.render({ canvasContext: context, canvas: canvas, viewport: scaledViewport }).promise;
+
                 if (!cancelled) {
                     setIsLoading(false);
                 }
             } catch (error) {
-                console.error("Ошибка загрузки PDF:", error);
+                console.error("Ошибка загрузки PDF:", drawing.pdfUrl, error);
                 if (!cancelled) {
                     setIsLoading(false);
+                    setLoadError(true);
                 }
             }
         };
@@ -291,7 +337,7 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
         <>
             <Card className="group overflow-hidden bg-[#F5F0E8] border border-[#8B7355]/10 hover:border-[#D4A574]/50 transition-all duration-500 hover:shadow-2xl hover:shadow-[#8B7355]/10 hover:-translate-y-2 rounded-3xl">
                 <div className="relative h-72 lg:h-80 bg-white cursor-pointer overflow-hidden rounded-t-3xl" onClick={handlePreviewClick}>
-                    {isLoading && (
+                    {isLoading && !loadError && (
                         <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
                             <div className="flex flex-col items-center gap-3">
                                 <div className="w-12 h-12 border-4 border-[#D4A574] border-t-transparent rounded-full animate-spin" />
@@ -299,7 +345,18 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                             </div>
                         </div>
                     )}
-                    <canvas id={drawing.canvasId} className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
+
+                    {loadError ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                            <div className="text-center p-4">
+                                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-2" />
+                                <p className="text-sm text-gray-500">Не удалось загрузить превью</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <canvas id={drawing.canvasId} className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
+                    )}
+
                     <div className="absolute inset-0 bg-gradient-to-t from-[#8B7355]/80 via-[#8B7355]/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
                         <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                             <Button size="lg" className="bg-white/95 hover:bg-white text-[#8B7355] rounded-full shadow-xl backdrop-blur-sm font-light">
@@ -308,7 +365,8 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                             </Button>
                         </div>
                     </div>
-                    {totalPages > 1 && (
+
+                    {totalPages > 1 && !loadError && (
                         <div className="absolute top-4 left-1/4 flex gap-2 z-20" onClick={(e) => e.stopPropagation()}>
                             <Button size="sm" variant="outline" className="h-9 px-3 bg-white/90 backdrop-blur-md border-[#8B7355]/20 hover:bg-white text-[#8B7355] disabled:opacity-30 rounded-full" onClick={handlePrevPage} disabled={pageNumber === 1}>
                                 <ChevronLeft className="w-4 h-4" />
@@ -321,8 +379,9 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                             </Button>
                         </div>
                     )}
+
                     {drawing.category && (
-                        <Badge className="absolute top-3 right-3 bg-gradient-to-r bg-[#8B7355] rounded-2xl p-2 urple-600 text-white border-0 shadow-lg">
+                        <Badge className="absolute top-3 right-3 bg-gradient-to-r bg-[#8B7355] rounded-2xl p-2 text-white border-0 shadow-lg">
                             {drawing.category}
                         </Badge>
                     )}
@@ -370,7 +429,7 @@ export default function Portfolio() {
                 return res.json();
             })
             .then((data) => {
-                console.log("Portfolio data received:", data); // Для отладки
+                console.log("Portfolio data received:", data);
                 setData(data);
                 setIsLoading(false);
             })
@@ -400,17 +459,7 @@ export default function Portfolio() {
         );
     }
 
-    if (!data) {
-        return (
-            <div className="py-24 text-center">
-                <p className="text-[#8B7355]/70">Нет данных</p>
-            </div>
-        );
-    }
-
-    // ✅ Безопасная проверка на существование массива projects
-    if (!data.projects || !Array.isArray(data.projects)) {
-        console.error("Invalid projects data:", data.projects);
+    if (!data || !data.projects || !Array.isArray(data.projects)) {
         return (
             <div className="py-24 text-center">
                 <p className="text-[#8B7355]/70">Проекты не найдены</p>
@@ -418,20 +467,18 @@ export default function Portfolio() {
         );
     }
 
-    // ✅ Теперь безопасно фильтруем и маппим
     const activeProjects = data.projects
-        .filter(p => p.isActive !== false) // Показываем все кроме явно отключенных
+        .filter(p => p.isActive !== false)
         .sort((a, b) => a.order - b.order)
         .map(p => ({
             id: p.id,
-            pdfUrl: p.pdfUrl,
+            pdfUrl: p.pdfUrl, // ✅ Работает с /pdf/ и с Blob URLs
             title: p.title,
             description: p.description,
             category: p.category,
             canvasId: `pdf-canvas-${p.id}`
         }));
 
-    // Если нет активных проектов
     if (activeProjects.length === 0) {
         return (
             <section id="portfolio" className="py-24 lg:py-32 relative overflow-hidden blueprint-pattern">
