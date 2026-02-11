@@ -1,74 +1,68 @@
+import { put, list, del } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir, readdir, unlink, stat } from 'fs/promises';
-import path from 'path';
+
+// Проверяем окружение
+const isProduction = process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production';
 
 export async function POST(request: NextRequest) {
-    console.log("=== Upload POST Request ===");
+    console.log("=== Upload POST (Vercel Blob) ===");
+    console.log("Environment:", process.env.NODE_ENV);
+    console.log("Is Production:", isProduction);
 
     try {
         const formData = await request.formData();
-        console.log("FormData received");
-
         const file = formData.get('file') as File;
-        console.log("File from formData:", file?.name, file?.size, file?.type);
 
         if (!file) {
-            console.error("No file in request");
             return NextResponse.json({ error: 'Файл не предоставлен' }, { status: 400 });
         }
 
         if (file.type !== 'application/pdf') {
-            console.error("Wrong file type:", file.type);
             return NextResponse.json({ error: 'Разрешены только PDF файлы' }, { status: 400 });
         }
 
-        if (file.size > 10 * 1024 * 1024) {
-            console.error("File too large:", file.size);
+        const MAX_SIZE = 10 * 1024 * 1024;
+        if (file.size > MAX_SIZE) {
             return NextResponse.json({ error: 'Файл слишком большой (макс 10MB)' }, { status: 400 });
         }
 
-        // Получаем байты файла
-        console.log("Reading file bytes...");
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        console.log("Buffer created, size:", buffer.length);
-
-        // Имя файла
-        const filename = file.name;
-        console.log("Filename:", filename);
-
-        // Путь к папке public/pdf
-        const publicDir = path.join(process.cwd(), 'public', 'pdf');
-        const filePath = path.join(publicDir, filename);
-        console.log("Target path:", filePath);
-
-        // Создаём папку если не существует
-        try {
-            await mkdir(publicDir, { recursive: true });
-            console.log("Directory ensured:", publicDir);
-        } catch (mkdirError) {
-            console.log("Directory already exists or created");
+        // Проверяем токен
+        const token = process.env.BLOB_READ_WRITE_TOKEN;
+        if (!token) {
+            console.error("BLOB_READ_WRITE_TOKEN not configured");
+            return NextResponse.json(
+                { error: 'Blob Storage не настроен. Добавьте BLOB_READ_WRITE_TOKEN' },
+                { status: 500 }
+            );
         }
 
-        // Сохраняем файл
-        console.log("Writing file...");
-        await writeFile(filePath, buffer);
-        console.log("✅ File saved successfully:", filename);
+        // Генерируем имя файла
+        const timestamp = Date.now();
+        const safeName = file.name
+            .toLowerCase()
+            .replace(/[^a-z0-9.-]/g, '_')
+            .replace(/_{2,}/g, '_');
+        const filename = `portfolio/${timestamp}_${safeName}`;
 
-        // URL для доступа
-        const fileUrl = `/pdf/${filename}`;
+        console.log("Uploading to Vercel Blob:", filename);
+
+        // Загружаем в Vercel Blob
+        const blob = await put(filename, file, {
+            access: 'public',
+            token: token,
+        });
+
+        console.log("✅ Uploaded to Blob:", blob.url);
 
         return NextResponse.json({
             success: true,
-            url: fileUrl,
-            filename: filename,
-            size: file.size
+            url: blob.url,
+            filename: file.name,
+            downloadUrl: blob.downloadUrl
         });
 
     } catch (error) {
         console.error("❌ Upload error:", error);
-        console.error("Error stack:", error instanceof Error ? error.stack : 'No stack');
-
         return NextResponse.json(
             {
                 error: 'Не удалось загрузить файл',
@@ -79,33 +73,24 @@ export async function POST(request: NextRequest) {
     }
 }
 
+// GET - список файлов из Blob
 export async function GET() {
     try {
-        const publicDir = path.join(process.cwd(), 'public', 'pdf');
-        await mkdir(publicDir, { recursive: true });
-
-        const files = await readdir(publicDir);
-        const pdfFiles = files.filter((file: string) => file.endsWith('.pdf'));
-
-        const fileList = await Promise.all(
-            pdfFiles.map(async (file: string) => {
-                const filePath = path.join(publicDir, file);
-                const stats = await stat(filePath);
-                return {
-                    filename: file,
-                    url: `/pdf/${file}`,
-                    size: stats.size,
-                    uploadedAt: stats.birthtime,
-                };
-            })
-        );
-
-        fileList.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+        const { blobs } = await list({
+            prefix: 'portfolio/',
+            limit: 100,
+            token: process.env.BLOB_READ_WRITE_TOKEN,
+        });
 
         return NextResponse.json({
             success: true,
-            files: fileList,
-            count: fileList.length
+            files: blobs.map(blob => ({
+                filename: blob.pathname.split('/').pop(),
+                url: blob.url,
+                size: blob.size,
+                uploadedAt: blob.uploadedAt,
+            })),
+            count: blobs.length
         });
 
     } catch (error) {
@@ -114,18 +99,20 @@ export async function GET() {
     }
 }
 
+// DELETE - удалить из Blob
 export async function DELETE(request: NextRequest) {
     try {
-        const { filename } = await request.json();
+        const { url } = await request.json();
 
-        if (!filename || !filename.endsWith('.pdf')) {
-            return NextResponse.json({ error: 'Некорректное имя файла' }, { status: 400 });
+        if (!url) {
+            return NextResponse.json({ error: 'URL обязателен' }, { status: 400 });
         }
 
-        const filePath = path.join(process.cwd(), 'public', 'pdf', filename);
-        await unlink(filePath);
+        await del(url, {
+            token: process.env.BLOB_READ_WRITE_TOKEN,
+        });
 
-        console.log('🗑️ File deleted:', filename);
+        console.log('🗑️ File deleted from Blob:', url);
 
         return NextResponse.json({
             success: true,
