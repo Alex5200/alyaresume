@@ -1,86 +1,125 @@
-// app/api/portfolio/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { get } from "@vercel/edge-config";
+import { NextRequest, NextResponse } from 'next/server';
+import { writeFile, mkdir, readdir, unlink, stat } from 'fs/promises';
+import path from 'path';
 
-const DEFAULT_DATA = {
-    heading: {
-        main: "Портфолио работ",
-        description: "Профессиональные чертежи и дизайн-проекты с детальной проработкой"
-    },
-    ctaButton: {
-        text: "Заказать подобный проект",
-        link: "#contact"
-    },
-    projects: [
-        {
-            id: 1,
-            title: "Дизайн проект квартиры",
-            description: "Детализированный чертеж с полной технической документацией",
-            pdfUrl: "/pdf/крузенштерна23.07.pdf",
-            category: "Квартиры",
-            isActive: true,
-            order: 1
-        }
-    ]
-};
-
-export async function GET() {
+// POST - загрузить PDF в public/pdf
+export async function POST(request: NextRequest) {
     try {
-        const data = await get("portfolio");
-        return NextResponse.json(data || DEFAULT_DATA);
-    } catch (error) {
-        console.error("GET error:", error);
-        return NextResponse.json(DEFAULT_DATA);
-    }
-}
+        const formData = await request.formData();
+        const file = formData.get('file') as File;
 
-export async function PUT(request: NextRequest) {
-    try {
-        const body = await request.json();
-
-        const edgeConfigId = process.env.EDGE_CONFIG_ID;
-        const vercelToken = process.env.VERCEL_API_TOKEN;
-
-        if (!edgeConfigId || !vercelToken) {
-            return NextResponse.json(
-                { error: "Edge Config not configured" },
-                { status: 500 }
-            );
+        if (!file) {
+            return NextResponse.json({ error: 'Файл не предоставлен' }, { status: 400 });
         }
 
-        const response = await fetch(
-            `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`,
-            {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${vercelToken}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    items: [
-                        {
-                            operation: "upsert",
-                            key: "portfolio",
-                            value: body,
-                        },
-                    ],
-                }),
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error("Failed to update Edge Config");
+        if (file.type !== 'application/pdf') {
+            return NextResponse.json({ error: 'Разрешены только PDF файлы' }, { status: 400 });
         }
+
+        if (file.size > 10 * 1024 * 1024) {
+            return NextResponse.json({ error: 'Файл слишком большой (макс 10MB)' }, { status: 400 });
+        }
+
+        // Получаем байты файла
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        // Сохраняем оригинальное имя файла
+        const filename = file.name;
+
+        // Путь к папке public/pdf
+        const publicDir = path.join(process.cwd(), 'public', 'pdf');
+        const filePath = path.join(publicDir, filename);
+
+        // Создаём папку если не существует
+        await mkdir(publicDir, { recursive: true });
+
+        // Сохраняем файл
+        await writeFile(filePath, buffer);
+        console.log('✅ PDF saved:', filename);
+
+        // URL в формате /pdf/filename.pdf
+        const fileUrl = `/pdf/${filename}`;
 
         return NextResponse.json({
             success: true,
-            message: "Portfolio updated successfully"
+            url: fileUrl,
+            filename: filename,
+            size: file.size
         });
+
     } catch (error) {
-        console.error("PUT error:", error);
+        console.error('❌ Upload error:', error);
         return NextResponse.json(
-            { error: "Failed to update portfolio" },
+            {
+                error: 'Не удалось загрузить файл',
+                details: error instanceof Error ? error.message : String(error)
+            },
             { status: 500 }
         );
+    }
+}
+
+// GET - получить список всех PDF из public/pdf
+export async function GET() {
+    try {
+        const publicDir = path.join(process.cwd(), 'public', 'pdf');
+
+        // Создаём папку если не существует
+        await mkdir(publicDir, { recursive: true });
+
+        const files = await readdir(publicDir);
+        const pdfFiles = files.filter((file: string) => file.endsWith('.pdf'));
+
+        const fileList = await Promise.all(
+            pdfFiles.map(async (file: string) => {
+                const filePath = path.join(publicDir, file);
+                const stats = await stat(filePath);
+                return {
+                    filename: file,
+                    url: `/pdf/${file}`,
+                    size: stats.size,
+                    uploadedAt: stats.birthtime,
+                };
+            })
+        );
+
+        // Сортируем по дате (новые первые)
+        fileList.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+
+        return NextResponse.json({
+            success: true,
+            files: fileList,
+            count: fileList.length
+        });
+
+    } catch (error) {
+        console.error('List error:', error);
+        return NextResponse.json({ error: 'Не удалось получить список файлов' }, { status: 500 });
+    }
+}
+
+// DELETE - удалить PDF из public/pdf
+export async function DELETE(request: NextRequest) {
+    try {
+        const { filename } = await request.json();
+
+        if (!filename || !filename.endsWith('.pdf')) {
+            return NextResponse.json({ error: 'Некорректное имя файла' }, { status: 400 });
+        }
+
+        const filePath = path.join(process.cwd(), 'public', 'pdf', filename);
+        await unlink(filePath);
+
+        console.log('🗑️ File deleted:', filename);
+
+        return NextResponse.json({
+            success: true,
+            message: 'Файл успешно удален'
+        });
+
+    } catch (error) {
+        console.error('Delete error:', error);
+        return NextResponse.json({ error: 'Не удалось удалить файл' }, { status: 500 });
     }
 }
