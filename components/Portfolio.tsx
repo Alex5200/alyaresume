@@ -357,21 +357,70 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
 
 export default function Portfolio() {
     const [data, setData] = useState<PortfolioData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        setIsLoading(true);
         fetch("/api/portfolio")
-            .then((res) => res.json())
-            .then((data) => setData(data))
-            .catch((err) => console.error("Failed to load portfolio:", err));
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then((data) => {
+                console.log("Portfolio data received:", data); // Для отладки
+                setData(data);
+                setIsLoading(false);
+            })
+            .catch((err) => {
+                console.error("Failed to load portfolio:", err);
+                setError(err.message);
+                setIsLoading(false);
+            });
     }, []);
 
-    if (!data) {
-        return <div className="py-24 text-center">Загрузка...</div>;
+    if (isLoading) {
+        return (
+            <div className="py-24 text-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-[#D4A574] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-[#8B7355]/70">Загрузка портфолио...</span>
+                </div>
+            </div>
+        );
     }
 
-    // Фильтруем только активные проекты и сортируем по order
+    if (error) {
+        return (
+            <div className="py-24 text-center">
+                <p className="text-red-600">Ошибка загрузки: {error}</p>
+            </div>
+        );
+    }
+
+    if (!data) {
+        return (
+            <div className="py-24 text-center">
+                <p className="text-[#8B7355]/70">Нет данных</p>
+            </div>
+        );
+    }
+
+    // ✅ Безопасная проверка на существование массива projects
+    if (!data.projects || !Array.isArray(data.projects)) {
+        console.error("Invalid projects data:", data.projects);
+        return (
+            <div className="py-24 text-center">
+                <p className="text-[#8B7355]/70">Проекты не найдены</p>
+            </div>
+        );
+    }
+
+    // ✅ Теперь безопасно фильтруем и маппим
     const activeProjects = data.projects
-        .filter(p => p.isActive)
+        .filter(p => p.isActive !== false) // Показываем все кроме явно отключенных
         .sort((a, b) => a.order - b.order)
         .map(p => ({
             id: p.id,
@@ -381,6 +430,20 @@ export default function Portfolio() {
             category: p.category,
             canvasId: `pdf-canvas-${p.id}`
         }));
+
+    // Если нет активных проектов
+    if (activeProjects.length === 0) {
+        return (
+            <section id="portfolio" className="py-24 lg:py-32 relative overflow-hidden blueprint-pattern">
+                <div className="container mx-auto px-4 text-center">
+                    <h2 className="text-4xl font-light text-[#8B7355] mb-6">
+                        {data.heading?.main || "Портфолио"}
+                    </h2>
+                    <p className="text-[#8B7355]/60">Проекты скоро появятся</p>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section id="portfolio" className="py-24 lg:py-32 relative overflow-hidden blueprint-pattern">
@@ -404,11 +467,13 @@ export default function Portfolio() {
                     ))}
                 </div>
 
-                <div className="text-center mt-16">
-                    <Button asChild size="lg" className="px-10 py-6 bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light tracking-wide transition-all duration-500 shadow-xl shadow-[#8B7355]/20 hover:shadow-2xl hover:shadow-[#D4A574]/30">
-                        <a href={data.ctaButton.link}>{data.ctaButton.text}</a>
-                    </Button>
-                </div>
+                {data.ctaButton && (
+                    <div className="text-center mt-16">
+                        <Button asChild size="lg" className="px-10 py-6 bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light tracking-wide transition-all duration-500 shadow-xl shadow-[#8B7355]/20 hover:shadow-2xl hover:shadow-[#D4A574]/30">
+                            <a href={data.ctaButton.link}>{data.ctaButton.text}</a>
+                        </Button>
+                    </div>
+                )}
             </div>
         </section>
     );
