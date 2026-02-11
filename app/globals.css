@@ -1,5 +1,13 @@
 /* app/globals.css */
 @import "tailwindcss";
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --primary: 26 38 21; /* RGB для #8B7355 */
+        --primary-foreground: 245 240 232; /* RGB для #F5F0E8 */
+    }
+}
 
 @theme {
     --color-primary: #8B7355;

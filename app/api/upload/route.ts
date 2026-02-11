@@ -1,9 +1,22 @@
-import { put, list, del } from '@vercel/blob';
+import { put } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
 
-// POST - загрузка файла
 export async function POST(request: NextRequest) {
     try {
+        // Проверка токена
+        const token = process.env.BLOB_READ_WRITE_TOKEN;
+
+        if (!token) {
+            console.error('ERROR: BLOB_READ_WRITE_TOKEN not found');
+            return NextResponse.json(
+                {
+                    error: 'Blob Storage не настроен. Проверьте BLOB_READ_WRITE_TOKEN',
+                    details: 'Environment variable missing'
+                },
+                { status: 500 }
+            );
+        }
+
         const formData = await request.formData();
         const file = formData.get('file') as File;
 
@@ -21,24 +34,27 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const MAX_SIZE = 20 * 1024 * 1024; // 20MB
+        const MAX_SIZE = 10 * 1024 * 1024;
         if (file.size > MAX_SIZE) {
             return NextResponse.json(
-                { error: 'Файл слишком большой (макс 20MB)' },
+                { error: 'Файл слишком большой (макс 10MB)' },
                 { status: 400 }
             );
         }
 
-        // Генерируем уникальное имя
+        // Генерируем имя файла
         const timestamp = Date.now();
         const safeName = file.name
-            .replace(/[^a-zA-Zа-яА-Я0-9.-]/g, '_')
+            .toLowerCase()
+            .replace(/[^a-zа-я0-9.-]/g, '_')
             .replace(/_{2,}/g, '_');
         const filename = `portfolio/${timestamp}_${safeName}`;
 
+        // Загрузка в Vercel Blob
         const blob = await put(filename, file, {
             access: 'public',
             addRandomSuffix: false,
+            token: token,
         });
 
         return NextResponse.json({
@@ -54,64 +70,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 error: 'Не удалось загрузить файл',
-                details: error instanceof Error ? error.message : 'Unknown error'
+                details: error instanceof Error ? error.message : String(error)
             },
-            { status: 500 }
-        );
-    }
-}
-
-// GET - список всех файлов
-export async function GET() {
-    try {
-        const { blobs } = await list({
-            prefix: 'portfolio/',
-            limit: 100
-        });
-
-        return NextResponse.json({
-            success: true,
-            files: blobs.map(blob => ({
-                url: blob.url,
-                pathname: blob.pathname,
-                size: blob.size,
-                uploadedAt: blob.uploadedAt,
-                downloadUrl: blob.downloadUrl
-            }))
-        });
-
-    } catch (error) {
-        console.error('List error:', error);
-        return NextResponse.json(
-            { error: 'Не удалось получить список файлов' },
-            { status: 500 }
-        );
-    }
-}
-
-// DELETE - удаление файла
-export async function DELETE(request: NextRequest) {
-    try {
-        const { url } = await request.json();
-
-        if (!url || !url.includes('blob.vercel-storage.com')) {
-            return NextResponse.json(
-                { error: 'Некорректный URL' },
-                { status: 400 }
-            );
-        }
-
-        await del(url);
-
-        return NextResponse.json({
-            success: true,
-            message: 'Файл успешно удален'
-        });
-
-    } catch (error) {
-        console.error('Delete error:', error);
-        return NextResponse.json(
-            { error: 'Не удалось удалить файл' },
             { status: 500 }
         );
     }
