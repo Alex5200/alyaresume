@@ -1,7 +1,7 @@
 // components/admin/FileUpload.tsx
 "use client";
 import { useState, useRef } from "react";
-import { Upload, File, X, Loader2 } from "lucide-react";
+import { Upload, File, X, Loader2, ExternalLink, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FileUploadProps {
@@ -18,13 +18,11 @@ export default function FileUpload({ onUploadComplete, currentFile }: FileUpload
     const handleUpload = async (file: File) => {
         if (!file) return;
 
-        // Проверка размера файла (максимум 10MB)
         if (file.size > 10 * 1024 * 1024) {
             alert("Файл слишком большой. Максимум 10MB");
             return;
         }
 
-        // Проверка типа файла
         if (file.type !== "application/pdf") {
             alert("Можно загружать только PDF файлы");
             return;
@@ -42,16 +40,17 @@ export default function FileUpload({ onUploadComplete, currentFile }: FileUpload
             });
 
             if (!response.ok) {
-                throw new Error("Upload failed");
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Upload failed");
             }
 
             const data = await response.json();
             setUploadedFile(data.url);
             onUploadComplete(data.url);
-            alert("Файл успешно загружен!");
+            alert("Файл успешно загружен в Vercel Blob Storage!");
         } catch (error) {
             console.error("Upload error:", error);
-            alert("Ошибка при загрузке файла");
+            alert(`Ошибка при загрузке файла: ${error instanceof Error ? error.message : 'Unknown error'}`);
         } finally {
             setUploading(false);
         }
@@ -96,6 +95,19 @@ export default function FileUpload({ onUploadComplete, currentFile }: FileUpload
         }
     };
 
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(uploadedFile);
+        alert("URL скопирован в буфер обмена!");
+    };
+
+    // Форматирование URL для отображения
+    const getDisplayUrl = (url: string) => {
+        if (url.length > 60) {
+            return url.substring(0, 30) + '...' + url.substring(url.length - 27);
+        }
+        return url;
+    };
+
     return (
         <div className="space-y-4">
             <input
@@ -121,7 +133,7 @@ export default function FileUpload({ onUploadComplete, currentFile }: FileUpload
                     {uploading ? (
                         <div className="flex flex-col items-center gap-3">
                             <Loader2 className="w-12 h-12 text-[#8B7355] animate-spin" />
-                            <p className="text-[#8B7355]/70">Загрузка файла...</p>
+                            <p className="text-[#8B7355]/70">Загрузка в Vercel Blob...</p>
                         </div>
                     ) : (
                         <div className="flex flex-col items-center gap-4">
@@ -143,24 +155,47 @@ export default function FileUpload({ onUploadComplete, currentFile }: FileUpload
                                 Выбрать файл
                             </Button>
                             <p className="text-xs text-[#8B7355]/50">
-                                Максимальный размер: 10MB
+                                Максимальный размер: 10MB • Хранится в Vercel Blob Storage
                             </p>
                         </div>
                     )}
                 </div>
             ) : (
                 <div className="border-2 border-[#8B7355]/20 rounded-xl p-6 bg-[#F5F0E8]">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-lg bg-[#8B7355]/10 flex items-center justify-center">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <div className="w-12 h-12 rounded-lg bg-[#8B7355]/10 flex items-center justify-center flex-shrink-0">
                                 <File className="w-6 h-6 text-[#8B7355]" />
                             </div>
-                            <div>
-                                <p className="text-[#8B7355] font-medium">PDF загружен</p>
-                                <p className="text-[#8B7355]/60 text-sm">{uploadedFile}</p>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[#8B7355] font-medium mb-1">PDF загружен</p>
+                                <p className="text-[#8B7355]/60 text-xs break-all">
+                                    {getDisplayUrl(uploadedFile)}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={copyToClipboard}
+                                        className="h-7 text-xs"
+                                    >
+                                        <Copy className="w-3 h-3 mr-1" />
+                                        Копировать URL
+                                    </Button>
+                                    <a
+                                        href={uploadedFile}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-xs text-[#8B7355] hover:underline"
+                                    >
+                                        <ExternalLink className="w-3 h-3" />
+                                        Открыть
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                             <Button
                                 type="button"
                                 variant="outline"

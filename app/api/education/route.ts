@@ -1,6 +1,6 @@
 // app/api/education/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { kv } from "@vercel/kv";
+import { get } from "@vercel/edge-config";
 
 const DEFAULT_DATA = {
     heading: {
@@ -25,6 +25,24 @@ const DEFAULT_DATA = {
             type: "education",
             isActive: true,
             order: 2
+        },
+        {
+            id: 3,
+            year: "2020",
+            title: "WorldSkills",
+            subtitle: "WorldSkills Russia совместно с ФГБОУ «ВДЦ Орленок», Дизайн интерьера",
+            type: "certificate",
+            isActive: true,
+            order: 3
+        },
+        {
+            id: 4,
+            year: "2018",
+            title: "Свидетельство",
+            subtitle: "АНОО Центр художественного и эстетического развития «Параллель»",
+            type: "certificate",
+            isActive: true,
+            order: 4
         }
     ]
 };
@@ -32,18 +50,10 @@ const DEFAULT_DATA = {
 // GET - Получить образование
 export async function GET() {
     try {
-        let data = await kv.get("education");
-
-        // Если данных нет, создаем дефолтные
-        if (!data) {
-            await kv.set("education", DEFAULT_DATA);
-            data = DEFAULT_DATA;
-        }
-
-        return NextResponse.json(data);
+        const data = await get("education");
+        return NextResponse.json(data || DEFAULT_DATA);
     } catch (error) {
         console.error("GET error:", error);
-        // Возвращаем дефолтные данные при ошибке
         return NextResponse.json(DEFAULT_DATA);
     }
 }
@@ -53,7 +63,7 @@ export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
 
-        // Валидация данных
+        // Валидация
         if (!body.heading || !body.items) {
             return NextResponse.json(
                 { error: "Invalid data format" },
@@ -61,7 +71,43 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        await kv.set("education", body);
+        // Получаем токен из переменных окружения
+        const edgeConfigId = process.env.EDGE_CONFIG_ID;
+        const vercelToken = process.env.VERCEL_API_TOKEN;
+
+        if (!edgeConfigId || !vercelToken) {
+            return NextResponse.json(
+                { error: "Edge Config not configured" },
+                { status: 500 }
+            );
+        }
+
+        // Обновляем через Vercel API
+        const response = await fetch(
+            `https://api.vercel.com/v1/edge-config/${edgeConfigId}/items`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${vercelToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    items: [
+                        {
+                            operation: "upsert",
+                            key: "education",
+                            value: body,
+                        },
+                    ],
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Edge Config update failed:", errorText);
+            throw new Error("Failed to update Edge Config");
+        }
 
         return NextResponse.json({
             success: true,
