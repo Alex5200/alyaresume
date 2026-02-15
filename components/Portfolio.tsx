@@ -195,12 +195,12 @@ const PDFPreviewModal = ({
                                 <ZoomIn className="w-4 h-4" />
                             </Button>
                         </div>
-                        <Button size="sm" asChild className="bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light">
-                            <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">
-                                <Download className="w-4 h-4 mr-2" />
-                                Скачать
-                            </a>
-                        </Button>
+                        {/*<Button size="sm" asChild className="bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light">*/}
+                        {/*    <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">*/}
+                        {/*        <Download className="w-4 h-4 mr-2" />*/}
+                        {/*        Скачать*/}
+                        {/*    </a>*/}
+                        {/*</Button>*/}
                     </div>
                 )}
 
