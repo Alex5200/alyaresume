@@ -11,7 +11,7 @@ export default function AdminLayout({
     return (
         <SessionProvider>
             <div className="min-h-screen bg-gray-50">
-                <AdminSidebar />
+                {/*<AdminSidebar />*/}
                 {/* Main Content */}
                 <main className="lg:ml-64 pt-16 lg:pt-0">
                     <div className="container mx-auto px-4 py-8">{children}</div>
