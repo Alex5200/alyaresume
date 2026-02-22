@@ -1,0 +1,16 @@
+# Создайте файл .env.local с этими настройками:
+
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret_here_change_this_in_production
+
+# Admin Credentials (for email/password login)
+ADMIN_EMAIL=admin@example.com
+ADMIN_HASHED_PASSWORD=$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LFvO6
+
+# Admin Email Authorization (optional - для Google OAuth)
+# ADMIN_EMAILS=admin@example.com,user@example.com
+
+# Google OAuth (optional)
+# GOOGLE_CLIENT_ID=your_google_client_id_here
+# GOOGLE_CLIENT_SECRET=your_google_client_secret_here

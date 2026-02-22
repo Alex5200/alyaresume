@@ -1,0 +1,32 @@
+# Selectel S3 Configuration for Portfolio Storage
+
+# Required - Selectel S3 Credentials
+AWS_ACCESS_KEY_ID=your_selectel_access_key_id
+AWS_SECRET_ACCESS_KEY=your_selectel_secret_access_key
+
+# Required - Selectel S3 Configuration
+AWS_REGION=ru-1
+S3_ENDPOINT=https://s3.ru-1.selcdn.ru
+S3_BUCKET_NAME=your-bucket-name
+
+# NextAuth Configuration (already set up)
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret
+
+# Admin Configuration (already set up)
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD_HASH=$2b$12$...
+
+# Edge Config (for Vercel)
+EDGE_CONFIG_ID=your_edge_config_id
+VERCEL_API_TOKEN=your_vercel_api_token
+
+# Selectel Regions:
+# ru-1: Moscow (https://s3.ru-1.selcdn.ru)
+# ru-2: Moscow (https://s3.ru-2.selcdn.ru)
+# ru-3: St. Petersburg (https://s3.ru-3.selcdn.ru)
+# ru-4: Kazan (https://s3.ru-4.selcdn.ru)
+# ru-5: Novosibirsk (https://s3.ru-5.selcdn.ru)
+# ru-7: Yekaterinburg (https://s3.ru-7.selcdn.ru)
+
+# Note: Use forcePathStyle: true for Selectel S3

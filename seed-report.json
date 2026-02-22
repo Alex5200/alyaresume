@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-02-22T12:38:24.214Z",
+  "uploaded": 2,
+  "total": 3,
+  "files": [
+    {
+      "title": "Проект квартиры на Крузенштерна",
+      "url": "https://s3.ru-3.storage.selcloud.ru/alyaadmin/portfolio/1771763902093_1.pdf",
+      "category": "Квартиры"
+    },
+    {
+      "title": "Современный интерьер",
+      "url": "https://s3.ru-3.storage.selcloud.ru/alyaadmin/portfolio/1771763903728_2.pdf",
+      "category": "Интерьеры"
+    }
+  ],
+  "portfolioData": {
+    "heading": {
+      "main": "Портфолио работ",
+      "description": "Профессиональные чертежи и дизайн-проекты с детальной проработкой"
+    },
+    "ctaButton": {
+      "text": "Заказать подобный проект",
+      "link": "#contact"
+    },
+    "projects": [
+      {
+        "id": 1,
+        "title": "Проект квартиры на Крузенштерна",
+        "description": "Профессиональный проект: Проект квартиры на Крузенштерна",
+        "pdfUrl": "https://s3.ru-3.storage.selcloud.ru/alyaadmin/portfolio/1771763902093_1.pdf",
+        "category": "Квартиры",
+        "isActive": true,
+        "order": 1
+      },
+      {
+        "id": 2,
+        "title": "Современный интерьер",
+        "description": "Профессиональный проект: Современный интерьер",
+        "pdfUrl": "https://s3.ru-3.storage.selcloud.ru/alyaadmin/portfolio/1771763903728_2.pdf",
+        "category": "Интерьеры",
+        "isActive": true,
+        "order": 2
+      }
+    ]
+  }
+}
