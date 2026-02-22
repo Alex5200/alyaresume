@@ -143,8 +143,8 @@ export default function FileUpload({ onUploadComplete, currentFile }: FileUpload
                 <div
                     className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
                         dragActive
-                            ? "border-[#D4A574] bg-[#D4A574]/5"
-                            : "border-gray-300 hover:border-[#8B7355]"
+                            ? "border-[#1E3A5F] bg-[#F1F5F9]"
+                            : "border-gray-300 hover:border-[#1E3A5F]"
                     }`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
@@ -153,44 +153,44 @@ export default function FileUpload({ onUploadComplete, currentFile }: FileUpload
                 >
                     {uploading ? (
                         <div className="flex flex-col items-center gap-3">
-                            <Loader2 className="w-12 h-12 text-[#8B7355] animate-spin" />
-                            <p className="text-[#8B7355]/70">Загрузка файла...</p>
+                            <Loader2 className="w-12 h-12 text-[#1E3A5F] animate-spin" />
+                            <p className="text-[#64748B]">Загрузка файла...</p>
                         </div>
                     ) : (
                         <div className="flex flex-col items-center gap-4">
-                            <div className="w-16 h-16 rounded-full bg-[#8B7355]/10 flex items-center justify-center">
-                                <Upload className="w-8 h-8 text-[#8B7355]" />
+                            <div className="w-16 h-16 rounded-full bg-[#F1F5F9] flex items-center justify-center">
+                                <Upload className="w-8 h-8 text-[#1E3A5F]" />
                             </div>
                             <div>
-                                <p className="text-[#8B7355] font-medium mb-1">
+                                <p className="text-[#1E293B] font-medium mb-1">
                                     Перетащите PDF файл сюда
                                 </p>
-                                <p className="text-[#8B7355]/60 text-sm">или</p>
+                                <p className="text-[#64748B] text-sm">или</p>
                             </div>
                             <Button
                                 type="button"
                                 onClick={handleButtonClick}
                                 disabled={uploading}
-                                className="bg-[#8B7355] hover:bg-[#D4A574] text-white"
+                                className="bg-[#1E3A5F] hover:bg-[#2E5A8B] text-white"
                             >
                                 Выбрать файл
                             </Button>
-                            <p className="text-xs text-[#8B7355]/50">
+                            <p className="text-xs text-[#94A3B8]">
                                 Максимальный размер: 10MB
                             </p>
                         </div>
                     )}
                 </div>
             ) : (
-                <div className="border-2 border-[#8B7355]/20 rounded-xl p-6 bg-[#F5F0E8]">
+                <div className="border-2 border-[#E2E8F0] rounded-xl p-6 bg-[#F8FAFC]">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-lg bg-[#8B7355]/10 flex items-center justify-center">
-                                <File className="w-6 h-6 text-[#8B7355]" />
+                            <div className="w-12 h-12 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
+                                <File className="w-6 h-6 text-[#1E3A5F]" />
                             </div>
                             <div>
-                                <p className="text-[#8B7355] font-medium">PDF загружен</p>
-                                <p className="text-[#8B7355]/60 text-sm break-all">{uploadedFile}</p>
+                                <p className="text-[#1E293B] font-medium">PDF загружен</p>
+                                <p className="text-[#64748B] text-sm break-all">{uploadedFile}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">

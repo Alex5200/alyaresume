@@ -52,6 +52,15 @@
       "category": "Планировка",
       "isActive": true,
       "order": 5
+    },
+    {
+      "id": 6,
+      "title": "Дизайн-проект офиса",
+      "description": "Современный офисный интерьер с эргономичной планировкой",
+      "pdfUrl": "https://0a92262b-c8ca-4515-930c-b5dade8276cd.selstorage.ru/portfolio/1771764773812_7.pdf",
+      "category": "Офисы",
+      "isActive": true,
+      "order": 6
     }
   ]
 }

@@ -156,46 +156,46 @@ const PDFPreviewModal = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-7xl h-[90vh] bg-[#F5F0E8] border border-[#8B7355]/20 p-0 overflow-hidden rounded-3xl">
-                <DialogHeader className="px-8 py-6 border-b border-[#8B7355]/10">
+            <DialogContent className="max-w-7xl h-[90vh] bg-[#F8FAFC] border border-[#E2E8F0] p-0 overflow-hidden rounded-xl">
+                <DialogHeader className="px-8 py-6 border-b border-[#E2E8F0]">
                     <div className="flex items-center justify-between">
                         <div className="flex-1">
-                            <DialogTitle className="text-2xl font-light text-[#8B7355]">{title}</DialogTitle>
-                            <DialogDescription className="text-[#8B7355]/60 text-sm font-light mt-1">
+                            <DialogTitle className="text-2xl font-medium text-[#1E293B]">{title}</DialogTitle>
+                            <DialogDescription className="text-[#64748B] text-sm font-normal mt-1">
                                 Предпросмотр документа
                             </DialogDescription>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={onClose} className="text-[#8B7355]/70 hover:text-[#8B7355] hover:bg-[#8B7355]/5 rounded-full flex-shrink-0">
+                        <Button variant="ghost" size="icon" onClick={onClose} className="text-[#64748B] hover:text-[#1E293B] hover:bg-[#F1F5F9] rounded-lg flex-shrink-0">
                             <X className="w-5 h-5" />
                         </Button>
                     </div>
                 </DialogHeader>
 
                 {!loadError && (
-                    <div className="px-8 py-4 bg-white/50 border-b border-[#8B7355]/10 flex items-center justify-between flex-wrap gap-4">
+                    <div className="px-8 py-4 bg-white border-b border-[#E2E8F0] flex items-center justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-3">
-                            <Button size="sm" variant="outline" onClick={handlePrevPage} disabled={pageNumber === 1} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
+                            <Button size="sm" variant="outline" onClick={handlePrevPage} disabled={pageNumber === 1} className="bg-white border-[#E2E8F0] text-[#1E293B] hover:bg-[#F8FAFC] hover:border-[#1E3A5F] disabled:opacity-30 rounded-md">
                                 <ChevronLeft className="w-4 h-4" />
                             </Button>
-                            <div className="px-5 py-2 bg-[#D4A574]/10 text-[#8B7355] rounded-full text-sm font-light">
+                            <div className="px-5 py-2 bg-[#F1F5F9] text-[#1E293B] rounded-md text-sm font-normal">
                                 {pageNumber} / {totalPages}
                             </div>
-                            <Button size="sm" variant="outline" onClick={handleNextPage} disabled={pageNumber === totalPages} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
+                            <Button size="sm" variant="outline" onClick={handleNextPage} disabled={pageNumber === totalPages} className="bg-white border-[#E2E8F0] text-[#1E293B] hover:bg-[#F8FAFC] hover:border-[#1E3A5F] disabled:opacity-30 rounded-md">
                                 <ChevronRight className="w-4 h-4" />
                             </Button>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Button size="sm" variant="outline" onClick={handleZoomOut} disabled={scale <= 0.5} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
+                            <Button size="sm" variant="outline" onClick={handleZoomOut} disabled={scale <= 0.5} className="bg-white border-[#E2E8F0] text-[#1E293B] hover:bg-[#F8FAFC] hover:border-[#1E3A5F] disabled:opacity-30 rounded-md">
                                 <ZoomOut className="w-4 h-4" />
                             </Button>
-                            <div className="px-5 py-2 bg-[#D4A574]/10 text-[#8B7355] rounded-full text-sm font-light min-w-[80px] text-center">
+                            <div className="px-5 py-2 bg-[#F1F5F9] text-[#1E293B] rounded-md text-sm font-normal min-w-[80px] text-center">
                                 {Math.round(scale * 100)}%
                             </div>
-                            <Button size="sm" variant="outline" onClick={handleZoomIn} disabled={scale >= 3} className="bg-white border-[#8B7355]/20 text-[#8B7355] hover:bg-[#8B7355]/5 hover:border-[#D4A574] disabled:opacity-30 rounded-full">
+                            <Button size="sm" variant="outline" onClick={handleZoomIn} disabled={scale >= 3} className="bg-white border-[#E2E8F0] text-[#1E293B] hover:bg-[#F8FAFC] hover:border-[#1E3A5F] disabled:opacity-30 rounded-md">
                                 <ZoomIn className="w-4 h-4" />
                             </Button>
                         </div>
-                        {/*<Button size="sm" asChild className="bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light">*/}
+                        {/*<Button size="sm" asChild className="bg-[#1E3A5F] hover:bg-[#2E5A8B] text-white rounded-md font-medium">*/}
                         {/*    <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">*/}
                         {/*        <Download className="w-4 h-4 mr-2" />*/}
                         {/*        Скачать*/}
@@ -216,14 +216,14 @@ const PDFPreviewModal = ({
                         ) : (
                             <>
                                 {isLoading && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-[#F5F0E8]/90 backdrop-blur-sm z-10">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[#F8FAFC]/90 backdrop-blur-sm z-10">
                                         <div className="flex flex-col items-center gap-4">
-                                            <div className="w-16 h-16 border-4 border-[#D4A574] border-t-transparent rounded-full animate-spin" />
-                                            <span className="text-[#8B7355]/70 text-base font-light">Загрузка страницы...</span>
+                                            <div className="w-16 h-16 border-4 border-[#1E3A5F] border-t-transparent rounded-full animate-spin" />
+                                            <span className="text-[#64748B] text-base font-normal">Загрузка страницы...</span>
                                         </div>
                                     </div>
                                 )}
-                                <canvas id={canvasId} className="shadow-2xl shadow-[#8B7355]/20 max-w-full h-auto rounded-2xl" style={{ display: isLoading ? 'none' : 'block' }} />
+                                <canvas id={canvasId} className="shadow-lg shadow-[#1E3A5F]/10 max-w-full h-auto rounded-xl" style={{ display: isLoading ? 'none' : 'block' }} />
                             </>
                         )}
                     </div>
@@ -323,13 +323,13 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
 
     return (
         <>
-            <Card className="group overflow-hidden bg-[#F5F0E8] border border-[#8B7355]/10 hover:border-[#D4A574]/50 transition-all duration-500 hover:shadow-2xl hover:shadow-[#8B7355]/10 hover:-translate-y-2 rounded-3xl">
-                <div className="relative h-72 lg:h-80 bg-white cursor-pointer overflow-hidden rounded-t-3xl" onClick={handlePreviewClick}>
+            <Card className="group overflow-hidden bg-white border border-[#E2E8F0] hover:border-[#1E3A5F]/30 transition-all duration-300 hover:shadow-lg rounded-xl">
+                <div className="relative h-72 lg:h-80 bg-[#F8FAFC] cursor-pointer overflow-hidden rounded-t-xl" onClick={handlePreviewClick}>
                     {isLoading && !loadError && (
                         <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
                             <div className="flex flex-col items-center gap-3">
-                                <div className="w-12 h-12 border-4 border-[#D4A574] border-t-transparent rounded-full animate-spin" />
-                                <span className="text-[#8B7355]/70 text-sm font-light">Загрузка...</span>
+                                <div className="w-12 h-12 border-4 border-[#1E3A5F] border-t-transparent rounded-full animate-spin" />
+                                <span className="text-[#64748B] text-sm font-normal">Загрузка...</span>
                             </div>
                         </div>
                     )}
@@ -345,9 +345,9 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
                         <canvas id={drawing.canvasId} className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
                     )}
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#8B7355]/80 via-[#8B7355]/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B]/80 via-[#1E293B]/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
                         <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                            <Button size="lg" className="bg-white/95 hover:bg-white text-[#8B7355] rounded-full shadow-xl backdrop-blur-sm font-light">
+                            <Button size="lg" className="bg-white/95 hover:bg-white text-[#1E3A5F] rounded-lg shadow-xl backdrop-blur-sm font-medium">
                                 <Eye className="w-5 h-5 mr-2" />
                                 Посмотреть
                             </Button>
@@ -356,39 +356,39 @@ const DrawingCard = ({ drawing }: { drawing: Drawing }) => {
 
                     {totalPages > 1 && !loadError && (
                         <div className="absolute top-4 left-1/4 flex gap-2 z-20" onClick={(e) => e.stopPropagation()}>
-                            <Button size="sm" variant="outline" className="h-9 px-3 bg-white/90 backdrop-blur-md border-[#8B7355]/20 hover:bg-white text-[#8B7355] disabled:opacity-30 rounded-full" onClick={handlePrevPage} disabled={pageNumber === 1}>
+                            <Button size="sm" variant="outline" className="h-9 px-3 bg-white/90 backdrop-blur-md border-[#E2E8F0] hover:bg-white text-[#1E3A5F] disabled:opacity-30 rounded-md" onClick={handlePrevPage} disabled={pageNumber === 1}>
                                 <ChevronLeft className="w-4 h-4" />
                             </Button>
-                            <div className="bg-white/90 backdrop-blur-md text-[#8B7355] border border-[#8B7355]/20 h-9 px-4 flex items-center rounded-full text-sm font-light">
+                            <div className="bg-white/90 backdrop-blur-md text-[#1E293B] border border-[#E2E8F0] h-9 px-4 flex items-center rounded-md text-sm font-normal">
                                 {pageNumber} / {totalPages}
                             </div>
-                            <Button size="sm" variant="outline" className="h-9 px-3 bg-white/90 backdrop-blur-md border-[#8B7355]/20 hover:bg-white text-[#8B7355] disabled:opacity-30 rounded-full" onClick={handleNextPage} disabled={pageNumber === totalPages}>
+                            <Button size="sm" variant="outline" className="h-9 px-3 bg-white/90 backdrop-blur-md border-[#E2E8F0] hover:bg-white text-[#1E3A5F] disabled:opacity-30 rounded-md" onClick={handleNextPage} disabled={pageNumber === totalPages}>
                                 <ChevronRight className="w-4 h-4" />
                             </Button>
                         </div>
                     )}
 
                     {drawing.category && (
-                        <Badge className="absolute top-3 right-3 bg-gradient-to-r bg-[#8B7355] rounded-2xl p-2 text-white border-0 shadow-lg">
+                        <Badge className="absolute top-3 right-3 bg-[#1E3A5F] hover:bg-[#2E5A8B] text-white border-0 shadow-md text-xs font-medium px-3 py-1">
                             {drawing.category}
                         </Badge>
                     )}
                 </div>
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="p-6 space-y-4 bg-white">
                     <div>
-                        <h3 className="text-xl font-light text-[#8B7355] mb-2 group-hover:text-[#D4A574] transition-colors duration-300">
+                        <h3 className="text-xl font-semibold text-[#1E293B] mb-2 group-hover:text-[#1E3A5F] transition-colors duration-300">
                             {drawing.title}
                         </h3>
-                        <p className="text-[#8B7355]/60 text-sm font-light leading-relaxed">{drawing.description}</p>
+                        <p className="text-[#64748B] text-sm font-normal leading-relaxed">{drawing.description}</p>
                     </div>
                     <div className="flex flex-wrap gap-2 pt-2">
-                        <Button asChild size="sm" className="flex-1 bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light shadow-lg shadow-[#8B7355]/20">
+                        <Button asChild size="sm" className="flex-1 bg-[#1E3A5F] hover:bg-[#2E5A8B] text-white rounded-md font-medium shadow-md">
                             <a href={`/${slugify(drawing.title)}/pdf?src=${encodeURIComponent(drawing.pdfUrl)}`} className="flex items-center justify-center gap-2">
                                 <FileText className="w-4 h-4" />
                                 <span>PDF</span>
                             </a>
                         </Button>
-                        <Button asChild size="sm" className="flex-1 bg-[#D4A574] hover:bg-[#8B7355] text-white rounded-full font-light shadow-lg shadow-[#D4A574]/20">
+                        <Button asChild size="sm" className="flex-1 bg-[#C9A227] hover:bg-[#9A7B1A] text-white rounded-md font-medium shadow-md">
                             <a href={`/${slugify(drawing.title)}/3d`} className="flex items-center justify-center gap-2">
                                 <Box className="w-4 h-4" />
                                 <span>3D</span>
@@ -410,7 +410,7 @@ export default function Portfolio() {
     useEffect(() => {
         setIsLoading(true);
 
-        // ✅ Загружаем из API, если не получилось - из localStorage
+        // Загружаем только из API
         fetch("/api/portfolio-s3")
             .then((res) => {
                 if (!res.ok) {
@@ -420,52 +420,12 @@ export default function Portfolio() {
             })
             .then((apiData) => {
                 console.log("Portfolio data from API:", apiData);
-
-                // ✅ Пытаемся взять из localStorage если есть более свежие данные
-                const localData = localStorage.getItem('portfolio_backup');
-                if (localData) {
-                    try {
-                        const parsedLocal = JSON.parse(localData);
-                        console.log("Portfolio data from localStorage:", parsedLocal);
-
-                        // Если в localStorage больше проектов или есть Blob URLs - используем его
-                        if (parsedLocal.projects && Array.isArray(parsedLocal.projects)) {
-                            const hasBlobURLs: any = parsedLocal.projects.some((p: any) =>
-                                p.pdfUrl && isBlobUrl(p.pdfUrl)
-                            );
-
-                            if (hasBlobURLs || parsedLocal.projects.length > apiData.projects?.length) {
-                                console.log("Using localStorage data (has Blob URLs or more projects)");
-                                setData(parsedLocal);
-                                setIsLoading(false);
-                                return;
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Failed to parse localStorage:", e);
-                    }
-                }
-
-                // Используем данные из API
                 setData(apiData);
                 setIsLoading(false);
             })
             .catch((err) => {
-                console.error("Failed to load from API, trying localStorage:", err);
-
-                // ✅ Fallback на localStorage
-                const localData = localStorage.getItem('portfolio_backup');
-                if (localData) {
-                    try {
-                        const parsedLocal = JSON.parse(localData);
-                        console.log("Using localStorage fallback:", parsedLocal);
-                        setData(parsedLocal);
-                    } catch (parseErr) {
-                        setError("Не удалось загрузить данные");
-                    }
-                } else {
-                    setError(err.message);
-                }
+                console.error("Failed to load from API:", err);
+                setError(err.message);
                 setIsLoading(false);
             });
     }, []);
@@ -474,8 +434,8 @@ export default function Portfolio() {
         return (
             <div className="py-24 text-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-[#D4A574] border-t-transparent rounded-full animate-spin" />
-                    <span className="text-[#8B7355]/70">Загрузка портфолио...</span>
+                    <div className="w-12 h-12 border-4 border-[#1E3A5F] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-[#64748B]">Загрузка портфолио...</span>
                 </div>
             </div>
         );
@@ -492,7 +452,7 @@ export default function Portfolio() {
     if (!data || !data.projects || !Array.isArray(data.projects)) {
         return (
             <div className="py-24 text-center">
-                <p className="text-[#8B7355]/70">Проекты не найдены</p>
+                <p className="text-[#64748B]">Проекты не найдены</p>
             </div>
         );
     }
@@ -511,30 +471,30 @@ export default function Portfolio() {
 
     if (activeProjects.length === 0) {
         return (
-            <section id="portfolio" className="py-24 lg:py-32 relative overflow-hidden blueprint-pattern">
+            <section id="portfolio" className="py-24 lg:py-32 relative overflow-hidden blueprint-pattern bg-[#F8FAFC]">
                 <div className="container mx-auto px-4 text-center">
-                    <h2 className="text-4xl font-light text-[#8B7355] mb-6">
+                    <h2 className="text-4xl font-semibold text-[#1E293B] mb-6">
                         {data.heading?.main || "Портфолио"}
                     </h2>
-                    <p className="text-[#8B7355]/60">Проекты скоро появятся</p>
+                    <p className="text-[#64748B]">Проекты скоро появятся</p>
                 </div>
             </section>
         );
     }
 
     return (
-        <section id="portfolio" className="py-24 lg:py-32 relative overflow-hidden blueprint-pattern">
+        <section id="portfolio" className="py-24 lg:py-32 relative overflow-hidden blueprint-pattern bg-[#F8FAFC]">
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center mb-16 lg:mb-20 max-w-3xl mx-auto">
-                    <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#D4A574] to-transparent mx-auto mb-6 animate-pulse" />
-                    <h2 className="text-4xl lg:text-5xl font-light text-[#8B7355] mb-6 tracking-tight">
+                    <div className="w-40 h-0.5 bg-gradient-to-r from-transparent via-[#1E3A5F] to-transparent mx-auto mb-6" />
+                    <h2 className="text-4xl lg:text-5xl font-semibold text-[#1E293B] mb-6 tracking-tight">
                         {data.heading.main}
                     </h2>
                     <div className="inline-flex gap-2">
-                        <p className="text-lg text-[#8B7355]/60 font-light leading-relaxed">
+                        <p className="text-lg text-[#64748B] font-normal leading-relaxed">
                             {data.heading.description}
                         </p>
-                        <Sparkles className="w-4 h-4 text-[#D4A574] animate-pulse" />
+                        <Sparkles className="w-4 h-4 text-[#C9A227]" />
                     </div>
                 </div>
 
@@ -546,7 +506,7 @@ export default function Portfolio() {
 
                 {data.ctaButton && (
                     <div className="text-center mt-16">
-                        <Button asChild size="lg" className="px-10 py-6 bg-[#8B7355] hover:bg-[#D4A574] text-white rounded-full font-light tracking-wide transition-all duration-500 shadow-xl shadow-[#8B7355]/20 hover:shadow-2xl hover:shadow-[#D4A574]/30">
+                        <Button asChild size="lg" className="px-10 py-6 bg-[#1E3A5F] hover:bg-[#2E5A8B] text-white rounded-lg font-medium tracking-wide transition-all duration-300 shadow-lg hover:shadow-xl">
                             <a href={data.ctaButton.link}>{data.ctaButton.text}</a>
                         </Button>
                     </div>

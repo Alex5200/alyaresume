@@ -23,9 +23,9 @@ export default function About() {
 
     return (
         <section id="about" className="py-20 lg:py-28 relative overflow-hidden">
-            {/* Background Effects */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_20%,rgba(34,197,94,0.08),transparent_50%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_80%,rgba(22,163,74,0.08),transparent_50%)]" />
+            {/* Background Effects - новые цвета */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_20%,rgba(30,58,95,0.05),transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_80%,rgba(30,58,95,0.05),transparent_50%)]" />
 
             <div className="container mx-auto px-4 relative z-10">
                 {/* Header */}
