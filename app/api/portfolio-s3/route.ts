@@ -41,12 +41,19 @@ const DEFAULT_DATA = {
 export async function GET() {
   try {
     console.log("=== /api/portfolio-s3 GET ===");
+    console.log("Environment check:", {
+      hasBucket: !!process.env.S3_BUCKET_NAME,
+      hasEndpoint: !!process.env.S3_ENDPOINT,
+      hasPublicEndpoint: !!process.env.PUBLIC_S3_ENDPOINT,
+      hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
+      hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY,
+    });
 
     // Получаем метаданные из S3
     const s3Data = await getPortfolioMetadata();
     
     if (s3Data) {
-      console.log("Using S3 portfolio metadata");
+      console.log("Using S3 portfolio metadata, projects count:", s3Data.projects?.length || 0);
       return NextResponse.json(s3Data);
     }
 
@@ -56,7 +63,16 @@ export async function GET() {
 
   } catch (error) {
     console.error("GET /api/portfolio-s3 error:", error);
-    return NextResponse.json(DEFAULT_DATA);
+    // Return default data with error info
+    return NextResponse.json({
+      ...DEFAULT_DATA,
+      _error: error instanceof Error ? error.message : String(error),
+      _env_check: {
+        hasBucket: !!process.env.S3_BUCKET_NAME,
+        hasEndpoint: !!process.env.S3_ENDPOINT,
+        hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
+      }
+    }, { status: 200 });
   }
 }
 

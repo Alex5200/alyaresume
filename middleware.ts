@@ -3,17 +3,18 @@ import { NextResponse } from "next/server"
 
 export default withAuth(
   function middleware(req) {
-    // Allow access to login page and API routes
-    if (req.nextUrl.pathname.startsWith('/admin/login') || 
-        req.nextUrl.pathname.startsWith('/api/auth')) {
+    const { pathname } = req.nextUrl
+    const { token } = req.nextauth
+
+    // Allow public access to login page
+    if (pathname === '/admin/login' || pathname.startsWith('/api/auth')) {
       return NextResponse.next()
     }
 
-    // Protect admin routes
-    if (req.nextUrl.pathname.startsWith('/admin')) {
-      if (!req.nextauth.token) {
-        return NextResponse.redirect(new URL('/admin/login', req.url))
-      }
+    // If not authenticated and trying to access admin, redirect to login
+    if (!token && pathname.startsWith('/admin')) {
+      const loginUrl = new URL('/admin/login', req.url)
+      return NextResponse.redirect(loginUrl)
     }
 
     return NextResponse.next()
@@ -21,20 +22,22 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow access to login page and API routes
-        if (req.nextUrl.pathname.startsWith('/admin/login') || 
+        // Public routes
+        if (req.nextUrl.pathname === '/admin/login' || 
             req.nextUrl.pathname.startsWith('/api/auth')) {
           return true
         }
-
-        // Protect admin routes
+        // Admin requires token
         if (req.nextUrl.pathname.startsWith('/admin')) {
           return !!token
         }
-
         return true
       },
     },
+    pages: {
+      signIn: '/admin/login',
+      error: '/admin/login',
+    }
   }
 )
 
