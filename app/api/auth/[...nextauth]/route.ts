@@ -23,23 +23,39 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log("=== NextAuth authorize ===")
+        console.log("Credentials email:", credentials?.email)
+        console.log("ADMIN_EMAIL env:", ADMIN_EMAIL)
+        console.log("Has password hash:", !!ADMIN_PASSWORD_HASH)
+        
         if (!credentials?.email || !credentials?.password) {
+          console.log("Missing credentials")
           return null
         }
 
         // Check email
         if (credentials.email !== ADMIN_EMAIL) {
+          console.log("Email mismatch:", credentials.email, "!==", ADMIN_EMAIL)
           return null
         }
 
         // Verify password
         const hash = ADMIN_PASSWORD_HASH || FALLBACK_HASH
-        const valid = await bcrypt.compare(credentials.password, hash)
+        console.log("Using hash (first 20 chars):", hash.substring(0, 20) + "...")
+        
+        try {
+          const valid = await bcrypt.compare(credentials.password, hash)
+          console.log("Password valid:", valid)
 
-        if (!valid) {
+          if (!valid) {
+            return null
+          }
+        } catch (err) {
+          console.error("Bcrypt error:", err)
           return null
         }
 
+        console.log("Authorization successful")
         return {
           id: "admin-1",
           email: ADMIN_EMAIL,
