@@ -2,7 +2,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import "./custom-utilities.css"; // <-- Добавьте эту строку
 
 // Загружаем Viaoda Libre через next/font
 const viaoda = localFont({

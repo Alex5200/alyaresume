@@ -411,7 +411,7 @@ export default function Portfolio() {
         setIsLoading(true);
 
         // ✅ Загружаем из API, если не получилось - из localStorage
-        fetch("/api/portfolio")
+        fetch("/api/portfolio-s3")
             .then((res) => {
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
@@ -430,11 +430,11 @@ export default function Portfolio() {
 
                         // Если в localStorage больше проектов или есть Blob URLs - используем его
                         if (parsedLocal.projects && Array.isArray(parsedLocal.projects)) {
-                            const hasBlob URLs = parsedLocal.projects.some((p: any) =>
+                            const hasBlobURLs: any = parsedLocal.projects.some((p: any) =>
                                 p.pdfUrl && isBlobUrl(p.pdfUrl)
                             );
 
-                            if (hasBlob || parsedLocal.projects.length > apiData.projects?.length) {
+                            if (hasBlobURLs || parsedLocal.projects.length > apiData.projects?.length) {
                                 console.log("Using localStorage data (has Blob URLs or more projects)");
                                 setData(parsedLocal);
                                 setIsLoading(false);

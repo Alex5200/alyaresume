@@ -10,30 +10,48 @@
   "projects": [
     {
       "id": 1,
-      "title": "Дизайн проект квартиры",
-      "description": "Детализированный чертеж с полной технической документацией",
-      "pdfUrl": "/pdf/крузенштерна23.07.pdf",
+      "title": "Проект квартиры на Крузенштерна",
+      "description": "Полный дизайн-проект трехкомнатной квартиры с детальной проработкой всех помещений",
+      "pdfUrl": "https://0a92262b-c8ca-4515-930c-b5dade8276cd.selstorage.ru/portfolio/1771763902093_1.pdf",
       "category": "Квартиры",
       "isActive": true,
       "order": 1
     },
     {
       "id": 2,
-      "title": "Дизайн проект квартиры 46 кв.м",
-      "description": "Комплексный дизайн-проект с планировочными решениями",
-      "pdfUrl": "/pdf/1.pdf",
-      "category": "Квартиры",
+      "title": "Современный интерьер",
+      "description": "Дизайн-проект гостиной с использованием современных материалов и технологий",
+      "pdfUrl": "https://0a92262b-c8ca-4515-930c-b5dade8276cd.selstorage.ru/portfolio/1771763903728_2.pdf",
+      "category": "Интерьеры",
       "isActive": true,
       "order": 2
     },
     {
       "id": 3,
-      "title": "Дизайн проект квартиры",
-      "description": "Архитектурные чертежи и визуализации интерьера",
-      "pdfUrl": "/pdf/2.pdf",
-      "category": "Квартиры",
+      "title": "Классический ремонт",
+      "description": "Проект реконструкции с сохранением классических элементов интерьера",
+      "pdfUrl": "https://0a92262b-c8ca-4515-930c-b5dade8276cd.selstorage.ru/portfolio/1771764449834_2.pdf",
+      "category": "Ремонт",
       "isActive": true,
       "order": 3
+    },
+    {
+      "id": 4,
+      "title": "Архитектурные чертежи",
+      "description": "Комплект рабочих чертежей для строительных работ",
+      "pdfUrl": "https://0a92262b-c8ca-4515-930c-b5dade8276cd.selstorage.ru/portfolio/1771763363168_1.pdf",
+      "category": "Чертежи",
+      "isActive": true,
+      "order": 4
+    },
+    {
+      "id": 5,
+      "title": "Планировочные решения",
+      "description": "Варианты перепланировки пространства с оптимизацией функциональных зон",
+      "pdfUrl": "https://0a92262b-c8ca-4515-930c-b5dade8276cd.selstorage.ru/portfolio/1771763364971_2.pdf",
+      "category": "Планировка",
+      "isActive": true,
+      "order": 5
     }
   ]
 }

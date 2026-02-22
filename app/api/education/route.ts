@@ -50,8 +50,9 @@ const DEFAULT_DATA = {
 // GET - Получить образование
 export async function GET() {
     try {
-        const data = await get("education");
-        return NextResponse.json(data || DEFAULT_DATA);
+        // Временно используем DEFAULT_DATA вместо Edge Config
+        console.log("Using default education data (Edge Config not available)");
+        return NextResponse.json(DEFAULT_DATA);
     } catch (error) {
         console.error("GET error:", error);
         return NextResponse.json(DEFAULT_DATA);

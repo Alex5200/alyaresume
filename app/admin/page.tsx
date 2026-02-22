@@ -1,4 +1,5 @@
 // app/admin/page.tsx
+"use client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -14,9 +15,32 @@ import {
     Eye,
     Edit,
     ArrowRight,
+    LogOut,
+    User,
 } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    if (status === "loading") {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
+    if (!session) {
+        router.push("/admin/login");
+        return null;
+    }
+
+    const handleLogout = async () => {
+        await signOut({ callbackUrl: "/" });
+    };
     const quickActions = [
         {
             title: "Портфолио",
@@ -99,13 +123,30 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                    Панель управления
-                </h1>
-                <p className="text-gray-600">
-                    Добро пожаловать в административную панель вашего сайта
-                </p>
+            <div className="flex justify-between items-start">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                        Панель управления
+                    </h1>
+                    <p className="text-gray-600">
+                        Добро пожаловать в административную панель вашего сайта
+                    </p>
+                </div>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <User className="w-4 h-4" />
+                        {session.user?.email}
+                    </div>
+                    <Button
+                        onClick={handleLogout}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        Выйти
+                    </Button>
+                </div>
             </div>
 
             {/* Stats Grid */}

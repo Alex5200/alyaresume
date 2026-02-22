@@ -8,10 +8,12 @@ import About from "@/components/About";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import Education from "@/components/Education";
+import CacheInfo from "@/components/CacheInfo";
 
 export default function Home() {
     return (
         <div className="min-h-screen">
+            {/*<CacheInfo />*/}
             <Header />
             <Hero />
             <Portfolio />

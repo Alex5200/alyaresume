@@ -38,8 +38,9 @@ const DEFAULT_DATA = {
 
 export async function GET() {
     try {
-        const data = await get("contacts");
-        return NextResponse.json(data || DEFAULT_DATA);
+        // Временно используем DEFAULT_DATA вместо Edge Config
+        console.log("Using default contacts data (Edge Config not available)");
+        return NextResponse.json(DEFAULT_DATA);
     } catch (error) {
         console.error("GET error:", error);
         return NextResponse.json(DEFAULT_DATA);

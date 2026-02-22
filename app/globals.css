@@ -1,25 +1,33 @@
 /* app/globals.css */
 @import "tailwindcss";
-@tailwind utilities;
-
-@layer base {
-    :root {
-        --primary: 26 38 21; /* RGB для #8B7355 */
-        --primary-foreground: 245 240 232; /* RGB для #F5F0E8 */
-    }
-}
 
 @theme {
-    --color-primary: #8B7355;
-    --color-accent: #D4A574;
-    --color-sand: #E8DCC4;
-    --color-cream: #F5F0E8;
+    --color-primary: #1E3A5F;
+    --color-primary-dark: #0F1F33;
+    --color-primary-light: #2E5A8B;
+    --color-accent: #C9A227;
+    --color-accent-dark: #9A7B1A;
+    --color-gray-50: #F8FAFC;
+    --color-gray-100: #F1F5F9;
+    --color-gray-200: #E2E8F0;
+    --color-gray-300: #CBD5E1;
+    --color-gray-400: #94A3B8;
+    --color-gray-500: #64748B;
+    --color-gray-600: #475569;
+    --color-gray-700: #334155;
+    --color-gray-800: #1E293B;
+    --color-gray-900: #0F172A;
+    --color-white: #FFFFFF;
 }
 
 body {
-    background: #F5F0E8;
+    background: #F8FAFC;
     min-height: 100vh;
     position: relative;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1E293B;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Анимация появления */
@@ -73,23 +81,22 @@ body {
     animation: float 6s ease-in-out infinite;
 }
 
-/* Паттерн чертежа на фоне */
+/* Паттерн на фоне - профессиональный */
 .blueprint-pattern {
     background-image:
-            linear-gradient(rgba(139, 115, 85, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(139, 115, 85, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+            linear-gradient(rgba(30, 58, 95, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(30, 58, 95, 0.02) 1px, transparent 1px);
+    background-size: 50px 50px;
 }
 
-/* Эффект бумаги */
+/* Эффект профессиональной карточки */
 .paper-texture {
-    background-color: #F5F0E8;
-    box-shadow:
-            0 1px 3px rgba(139, 115, 85, 0.12),
-            0 1px 2px rgba(139, 115, 85, 0.08);
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #E2E8F0;
 }
 
-/* Линии чертежа */
+/* Профессиональная линия */
 .sketch-line {
     position: relative;
 }
@@ -103,7 +110,7 @@ body {
     height: 1px;
     background: linear-gradient(90deg,
     transparent 0%,
-    rgba(139, 115, 85, 0.3) 10%,
-    rgba(139, 115, 85, 0.3) 90%,
+    rgba(30, 58, 95, 0.2) 10%,
+    rgba(30, 58, 95, 0.2) 90%,
     transparent 100%);
 }

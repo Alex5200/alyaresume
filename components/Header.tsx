@@ -16,7 +16,7 @@ export default function Header() {
   const navItems = [
     { name: "Главная", href: "#hero", icon: Home },
     { name: "Портфолио", href: "#portfolio", icon: Briefcase },
-    { name: "Услуги", href: "#services", icon: FileText },
+    { name: "Услуги", href: "/voice", icon: FileText },
     { name: "Обо мне", href: "#about", icon: User },
     { name: "Контакты", href: "#contact", icon: Mail },
   ];
@@ -30,15 +30,7 @@ export default function Header() {
           }`}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <a
-                href="#hero"
-                className="text-2xl font-light text-[#8B7355] tracking-wider hover:text-[#D4A574] transition-colors duration-300"
-            >
-
-
-            </a>
+          <div className="flex items-center justify-center h-20">
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-2">

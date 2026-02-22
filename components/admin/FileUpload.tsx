@@ -46,9 +46,9 @@ export default function FileUpload({ onUploadComplete, currentFile }: FileUpload
             const formData = new FormData();
             formData.append("file", file);
 
-            console.log("Sending to /api/upload...");
+            console.log("Sending to /api/s3-upload...");
 
-            const response = await fetch("/api/upload", {
+            const response = await fetch("/api/s3-upload", {
                 method: "POST",
                 body: formData,
             });

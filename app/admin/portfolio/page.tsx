@@ -36,7 +36,7 @@ export default function AdminPortfolio() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch("/api/portfolio")
+        fetch("/api/portfolio-s3")
             .then((res) => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 return res.json();
@@ -64,7 +64,7 @@ export default function AdminPortfolio() {
 
         setSaving(true);
         try {
-            const response = await fetch("/api/portfolio", {
+            const response = await fetch("/api/portfolio-s3", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
